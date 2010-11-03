@@ -73,7 +73,7 @@ void nhexScreenShow(FILE *fp, int iOff, int iFileLength)
 
 	for(i=iOff; i < iFileLength; i++)
 	{
-		if (i%(iChunks*8) == 0)		/* new line */
+		if(i%(iChunks*8) == 0)		/* new line */
 		{
 			j++;
 			k=0;
@@ -84,16 +84,36 @@ void nhexScreenShow(FILE *fp, int iOff, int iFileLength)
 
 		c=getc(fp);
 
-		if (k%8 == 0 && k != -0)
+		if(k%8 == 0 && k != -0)
 			spacer++;
 
 		mvprintw(j+1, 9+k*3+spacer, "%02X", c);
-		if (c < 32 || c > 126) c=(int)'.';
+		if(c < 32 || c > 126) c=(int)'.';
 		mvprintw(j+1, 9+(iChunks*8)*3+(iChunks-1)+2+k+spacer, "%c",c);
 		
 		k++;
-		if (k == iChunks*8 && j == iRows-1)
+		if(k == iChunks*8 && j == iRows-1)
 			i=iFileLength;
+	}
+
+	/* clean rest of window */
+	if(k > 0)
+	{
+		for(i=k; i<iChunks*8; i++)
+		{
+			if(i%8 == 0)
+				spacer++;
+			mvprintw(j+1, 9+i*3+spacer, "  ");
+			mvprintw(j+1, 9+(iChunks*8)*3+(iChunks-1)+2+i+spacer," ");
+		}
+	}
+	if(j < iRows-1)
+	{
+		for(i=j+1; i<iRows; i++)
+		{
+			move(i+1, 0);
+			for(k=0; k<iCols; k++) printw(" ");
+		}
 	}
 
 	attron(A_REVERSE);
@@ -152,6 +172,21 @@ void nhexScreenDetails(char *pFileName, int iOff, int ixPos, int iyPos, bool bPo
 	return;
 }
 
+/* reset screen attributes on ixPos / iyPos */
+void nhexScreenDetReset(int ixPos, int iyPos)
+{
+	int iChunkPos, ixHexPos, ixAscPos;
+
+	iChunkPos=ixPos/8;
+	ixHexPos=9+ixPos*3+iChunkPos;
+	ixAscPos=9+(iChunks*8)*3+(iChunks-1)+2+ixPos+iChunkPos;
+
+	mvchgat(iyPos+1, ixHexPos, 2, 0, 0, NULL);
+	mvchgat(iyPos+1, ixAscPos, 2, 0, 0, NULL);
+	
+	return;
+}
+
 /* Cleanup */
 void nhexCleanup(void)
 {
@@ -205,7 +240,7 @@ int main(int argc, char *argv[])
 	//bool bNeedSave=false;
 	char sFileName[MAXFILENAME];
 	int c;
-	bool ready, update;
+	bool ready, scrUpdate, scrRedraw;
 
 	if(argc != 2)
 	{
@@ -250,51 +285,93 @@ int main(int argc, char *argv[])
 	while(1)
 	{
 		c=getch();
-		update=false;
+		scrUpdate=false;
+		scrRedraw=false;
 		switch(c)
 		{	case KEY_UP:
-				if(iyPos > 0) iyPos--;
-				update=true;
+				if(iyPos == 0)
+				{
+					if(iOff >= iChunks*8)
+					{
+						iOff-=iChunks*8;
+						scrRedraw=true;
+					}
+				}
+				else
+				{
+					nhexScreenDetReset(ixPos, iyPos);
+					iyPos--;
+					scrUpdate=true;
+				}
 				break;
 			case KEY_DOWN:
-				if(iyPos < iRows-1) iyPos++;
-				update=true;
-				break;
+				if(iOff+(iyPos+1)*iChunks*8+ixPos <= iFileLength-1)
+				{
+					if(iyPos == iRows-1)
+					{
+						iOff+=iChunks*8;
+						scrRedraw=true;
+					}
+					else
+					{
+						nhexScreenDetReset(ixPos, iyPos);
+						iyPos++;
+						scrUpdate=true;
+					}
+				}
+				break;		
 			case KEY_LEFT:
-				if(ixPos > 0) ixPos--;
-				update=true;
+				if(ixPos > 0)
+				{
+					nhexScreenDetReset(ixPos, iyPos);
+					ixPos--;
+					scrUpdate=true;
+				}
 				break;
 			case KEY_RIGHT:
-				if(ixPos < iChunks*8-1) ixPos++;
-				update=true;
+				if(iOff+iyPos*iChunks*8+ixPos+1 <= iFileLength-1)
+				{
+					nhexScreenDetReset(ixPos, iyPos);
+					ixPos++;
+					scrUpdate=true;
+					if(ixPos == iChunks*8)
+					{
+						ixPos=0;
+						if(iyPos == iRows-1)
+						{
+							iOff+=iChunks*8;
+							scrRedraw=true;
+						}
+						else
+						{
+							iyPos++;
+						}
+					}
+				}
 				break;
 			case KEY_NPAGE:
 				if(iOff+iRows*iChunks*8 < iFileLength) iOff+=iRows*iChunks*8;
-				update=true;
+				scrRedraw=true;
 				break;
 			case KEY_PPAGE:
 				if(iOff >= iRows*iChunks*8) iOff-=iRows*iChunks*8;
-				update=true;
+				scrRedraw=true;
 				break;
-			/*case 27:
-				ready=true;
-				break;*/
+			case 27:
+				/* menu */
+				break;
 			case KEY_CANCEL:
 				ready=true;
 				break;
 			default:
-				attron(A_REVERSE);
-				mvprintw(iRows+1,iCols-6-16-4,"|%3d",c);
-				//printw("|%3d-",c);
-				attroff(A_REVERSE);
-				//printf("[%3d]",c);
+				/* 'normal' character */
+				// check for validity hex / ascii
 				break;
 		}
-		if (update)
-		{
+		if(scrRedraw)
 			nhexScreenShow(fp, iOff, iFileLength);
+		if(scrUpdate || scrRedraw)
 			nhexScreenDetails(sFileName, iOff, ixPos, iyPos, bPos, bHiLo);
-		}
 		if(ready) break;
 	}
 
