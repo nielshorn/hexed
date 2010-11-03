@@ -1,0 +1,12 @@
+# Ignore backup files
+*~
+.*.swp
+# Files that will be regenerated
+Makefile.in
+config.h.in
+aclocal.m4
+configure
+# Files that are links to distribution files
+depcomp
+install-sh
+missing

@@ -1,0 +1,5 @@
+2010-11-02  Niels Horn <niels.horn@gmail.com>
+
+ * src/nhexfile.h: new header for nhexfile.c
+ * src/nhexfile.c: new file with file routines
+ * src/nhexed.c: new main program file

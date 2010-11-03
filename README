@@ -1,0 +1,12 @@
+nHex-Ed
+=======
+
+nHex-Ed is a simple Hex Editor that uses the ncurses library.
+
+It is loosely based on Hex-Ed for Windows (1), which was based on earlier
+hex-editor written by me in C on CP/M and MS-DOS, so the origin of this
+program started a few decades ago...
+
+It is a work-in-progress and has several limitations, most importantly a
+maximum file size of 16MB.
+
