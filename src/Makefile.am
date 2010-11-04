@@ -16,5 +16,7 @@
 # Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #
 bin_PROGRAMS = nhexed
-nhexed_SOURCES = nhexed.c nhexfile.c nhexfile.h
+nhexed_SOURCES = nhexed.c nhexed.h \
+		 nhexfile.c nhexfile.h nhex \
+		 nhexmsg.c nhexmsg.h
 LDADD = -lncurses

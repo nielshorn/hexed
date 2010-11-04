@@ -1,5 +1,5 @@
 /*
- * nhexfile.h - header for file routines for nHex-Ed
+ * nhexmsg.h - header for message routines for nHex-Ed
  *
  * Copyright (C) 2010 Niels Horn <niels.horn@gmail.com>
  *
@@ -20,7 +20,13 @@
  *
  */
 
-FILE* nhexFileReadOpen(char *pFileName, unsigned int *iFileLength);
-//char nhexFileReadPos(FILE *fp, unsigned int iChangeAddr[], unsigned char cChangeByte[], int iChangeCnt, unsigned int iAddr, char *style);
-char nhexFileReadPos(struct nhexBuff *nhexFile, unsigned int iAddr, char *style);
+/* types of messages */
+#define NHMSGERR	256;
+#define NHMSGWARN	512;
+
+/* "buttons" to include */
+#define NHMSGOK		1;
+#define NHMSGCANCEL	2;
+
+int nhexMsg(int flags, char *msg);
 

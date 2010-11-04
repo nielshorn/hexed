@@ -22,18 +22,22 @@
 
 #include <stdlib.h>
 #include <stdio.h>
+#include <stdbool.h>
+
+#include "nhexed.h"
 #include "nhexfile.h"
+#include "nhexmsg.h"
 
-#define DEBUG		1
-
+/* Open file, return iFileLength & *fp */
 FILE* nhexFileReadOpen(char *pFileName, unsigned int *iFileLength)
 {
 	FILE *fp;
 
-	fp = fopen(pFileName, "r");
+	fp = fopen(pFileName, "r+b");
 	if(fp == NULL)
 	{
-		printf("** Cannot open file\n");
+		//nhexMsg(NHMSGERR + NHMSGOK, "Cannot open file");
+		nhexMsg(257, "Cannot open file");
 		return NULL;
 	}
 	
@@ -48,3 +52,41 @@ FILE* nhexFileReadOpen(char *pFileName, unsigned int *iFileLength)
 
 	return fp;
 }
+
+/* Return byte from file (or changes) */
+//char nhexFileReadPos(FILE *fp, unsigned int iChangeAddr[], unsigned char cChangeByte[], int iChangeCnt, unsigned int iAddr, char *style)
+char nhexFileReadPos(struct nhexBuff *nhexFile, unsigned int iAddr, char *style)
+{
+	int		i;
+	unsigned char	c;
+	bool		bChange=false;
+
+	*style='n';
+
+	/* search in list of changes first */
+	for(i=nhexFile->iChangeCnt-1; i>=0; i--)
+	{
+		if(iAddr == nhexFile->iChangeAddr[i])
+		{
+			c=nhexFile->cChangeByte[i];
+			bChange=true;
+			break;
+		}
+	}
+
+	if(!bChange)
+	{
+		if(fseek(nhexFile->fp, (long)iAddr, SEEK_SET))
+		{
+			//nhexMsg(NHMSGERR + NHMSGOK,"Seek error");
+			nhexMsg(257, "Seek error");
+			exit(1);
+		}
+		c=getc(nhexFile->fp);
+	}
+
+	if(bChange) *style='c';
+	
+	return c;
+}
+
