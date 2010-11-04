@@ -20,7 +20,7 @@
  *
  */
 
-#define MAXLENGTH	16777215	/* max file length 16MB */
+#define MAXLENGTH	4294967295	/* max file length 4GB for uint */
 #define MAXFILENAME	256		/* max length of filename */
 
-FILE* nhexFileReadOpen(char *pFileName, int *iFileLength);
+FILE* nhexFileReadOpen(char *pFileName, unsigned int *iFileLength);

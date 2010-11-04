@@ -26,7 +26,7 @@
 
 #define DEBUG		1
 
-FILE* nhexFileReadOpen(char *pFileName, int *iFileLength)
+FILE* nhexFileReadOpen(char *pFileName, unsigned int *iFileLength)
 {
 	FILE *fp;
 

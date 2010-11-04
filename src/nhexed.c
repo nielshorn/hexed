@@ -29,7 +29,6 @@
 #include <string.h>
 #include "nhexfile.h"
 
-#define DEBUG		1
 #define MINCOLUMNS	43		/* 43=1 chunk, 34 for each extra chunk */
 #define MINROWS		3
 
@@ -59,7 +58,7 @@ void nhexScreenSetup(void)
 }
 
 /* Show file */
-void nhexScreenShow(FILE *fp, int iOff, int iFileLength)
+void nhexScreenShow(FILE *fp, int iOff, unsigned int iFileLength)
 {
 	int i=0, j=-1;
 	int k, spacer;
@@ -217,16 +216,16 @@ int nhexSanityCheck(void)
 /* main entry point */
 int main(int argc, char *argv[])
 {
-	FILE *fp;
-	int iFileLength;
-	int iOff=0;			/* Offset first byte on screen from file */
-	int ixPos=0, iyPos=0;		/* Position of 'cursor' */
-	bool bPos=false;		/* false = hex / true = ascii */
-	bool bHiLo=false;		/* false = High / true = Low */
+	FILE		*fp;
+	unsigned int 	iFileLength;
+	int 		iOff=0;			/* Offset first byte on screen from file */
+	int 		ixPos=0, iyPos=0;	/* Position of 'cursor' */
+	bool 		bPos=false;		/* false = hex / true = ascii */
+	bool 		bHiLo=false;		/* false = High / true = Low */
 	//bool bNeedSave=false;
-	char sFileName[MAXFILENAME];
-	int c;
-	bool ready, scrUpdate, scrRedraw;
+	char 		sFileName[MAXFILENAME];
+	int 		c;
+	bool 		ready, scrUpdate, scrRedraw;
 
 	if(argc != 2)
 	{
@@ -381,12 +380,14 @@ int main(int argc, char *argv[])
 			case KEY_END:
 				iOff=(iFileLength-1)/(iChunks*8);
 				iOff=(iOff-iRows+1)*iChunks*8;
+				if(iOff < 0) iOff=0;
 				iyPos=(iFileLength-1-iOff)/(iChunks*8);
 				ixPos=(iFileLength-1)%(iChunks*8);
 				scrRedraw=true;
 				break;
 			case 9:
 				bPos=!bPos;
+				bHiLo=false;
 				scrUpdate=true;
 			case 27:
 				/* menu */
