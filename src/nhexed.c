@@ -50,7 +50,7 @@ void nhexScreenSetup(void)
 	iChunks=(iCols-43)/34+1;
 
 	mvprintw(0, 0, "%s-v%s",PACKAGE,VERSION);
-	mvprintw(0, iCols-20, "|Press <F1> for menu");
+	mvprintw(0, iCols-21, "|Press <Esc> for menu");
 	mvchgat(0, 0, -1, A_REVERSE, 0, NULL);
 	mvchgat(iRows+1, 0, -1, A_REVERSE, 0, NULL);
 
@@ -115,10 +115,6 @@ void nhexScreenShow(FILE *fp, int iOff, int iFileLength)
 			for(k=0; k<iCols; k++) printw(" ");
 		}
 	}
-
-	attron(A_REVERSE);
-	mvprintw(iRows+1,0,"[j = %i]",j);
-	attroff(A_REVERSE);
 
 	refresh();
 }
@@ -221,16 +217,6 @@ int nhexSanityCheck(void)
 /* main entry point */
 int main(int argc, char *argv[])
 {
-	/*
-	 * TODO:
-	 * - more options
-	 *   -v	(verbose)
-	 *   -i (input file?)
-	 *   --position= (initial position in file)
-	 *   --find=xxx
-	 *   --version
-	 */
-
 	FILE *fp;
 	int iFileLength;
 	int iOff=0;			/* Offset first byte on screen from file */
@@ -350,13 +336,58 @@ int main(int argc, char *argv[])
 				}
 				break;
 			case KEY_NPAGE:
-				if(iOff+iRows*iChunks*8 < iFileLength) iOff+=iRows*iChunks*8;
-				scrRedraw=true;
+				if(iOff+iRows*iChunks*8 < iFileLength)
+				{
+					iOff+=iRows*iChunks*8;
+					if(iOff+iyPos*iChunks*8+ixPos > iFileLength-1)
+					{
+						iyPos=(iFileLength-1-iOff)/(iChunks*8);
+						if(ixPos > (iFileLength-1)%(iChunks*8))
+							ixPos=(iFileLength-1)%(iChunks*8);
+					}
+					scrRedraw=true;
+				}
 				break;
 			case KEY_PPAGE:
-				if(iOff >= iRows*iChunks*8) iOff-=iRows*iChunks*8;
+				if(iOff > 0)
+				{
+					iOff-=iRows*iChunks*8;
+					if(iOff < 0)
+					{
+						iOff=0;
+						iyPos=0;
+					}
+					scrRedraw=true;
+				}
+				break;
+			case KEY_SLEFT:
+				nhexScreenDetReset(ixPos, iyPos);
+				ixPos=0;
+				scrUpdate=true;
+				break;
+			case KEY_SRIGHT:
+				nhexScreenDetReset(ixPos, iyPos);
+				ixPos=iChunks*8-1;
+				if(iOff+iyPos*iChunks*8+ixPos > iFileLength)
+					ixPos=(iFileLength-1)%(iChunks*8);
+				scrUpdate=true;
+				break;
+			case KEY_HOME:
+				iOff=0;
+				ixPos=0;
+				iyPos=0;
 				scrRedraw=true;
 				break;
+			case KEY_END:
+				iOff=(iFileLength-1)/(iChunks*8);
+				iOff=(iOff-iRows+1)*iChunks*8;
+				iyPos=(iFileLength-1-iOff)/(iChunks*8);
+				ixPos=(iFileLength-1)%(iChunks*8);
+				scrRedraw=true;
+				break;
+			case 9:
+				bPos=!bPos;
+				scrUpdate=true;
 			case 27:
 				/* menu */
 				break;
@@ -366,6 +397,7 @@ int main(int argc, char *argv[])
 			default:
 				/* 'normal' character */
 				// check for validity hex / ascii
+				mvprintw(iRows+1,20,"%d",c);
 				break;
 		}
 		if(scrRedraw)
