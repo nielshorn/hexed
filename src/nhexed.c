@@ -228,12 +228,71 @@ int nhexSanityCheck(void)
 	return ret;
 }
 
+/* move cursor left one pos. */
+int nhexMvLeft(struct nhexBuff *nhexFile)
+{
+	int result=0;			/* 0=nothing, 1=update, 2-redraw */
+
+	if(nhexFile->iOff + nhexFile->iyPos * iChunks*8 + nhexFile->ixPos > 0)
+	{
+		nhexScreenDetReset(nhexFile);
+		nhexFile->ixPos--;
+		result=1;
+		nhexFile->bHiLo=false;
+		if(nhexFile->ixPos < 0)
+		{
+			nhexFile->ixPos=iChunks*8 - 1;
+			if(nhexFile->iyPos == 0)
+			{
+				nhexFile->iOff-=iChunks*8;
+				result=2;
+			}
+			else
+			{
+				nhexFile->iyPos--;
+			}
+		}
+	}
+
+	return result;
+}
+
+/* move cursor right one pos. */
+int nhexMvRight(struct nhexBuff *nhexFile)
+{
+	int result=0;			/* 0=nothing, 1=update, 2-redraw */
+
+	if(nhexFile->iOff + nhexFile->iyPos * iChunks*8 + nhexFile->ixPos + 1 <= nhexFile->iFileLength - 1)
+	{
+		nhexScreenDetReset(nhexFile);
+		nhexFile->ixPos++;
+		result=1;
+		nhexFile->bHiLo=false;
+		if(nhexFile->ixPos == iChunks*8)
+		{
+			nhexFile->ixPos=0;
+			if(nhexFile->iyPos == iRows-1)
+			{
+				nhexFile->iOff+=iChunks*8;
+				result=2;
+			}
+			else
+			{
+				nhexFile->iyPos++;
+			}
+		}
+	}
+
+	return result;
+}
+
 /* main entry point */
 int main(int argc, char *argv[])
 {
 	struct nhexBuff	nhexFile;
 	int 		c;
 	bool 		ready, scrUpdate, scrRedraw;
+	int		iRes;		/* temp result of functions etc. */
 	unsigned int	iTmp;		/* temp address for moves etc. */
 	unsigned char	cTmp;		/* temp char for editing etc. */
 	char		style;
@@ -321,35 +380,14 @@ int main(int argc, char *argv[])
 				}
 				break;		
 			case KEY_LEFT:
-				if(nhexFile.ixPos > 0)
-				{
-					nhexScreenDetReset(&nhexFile);
-					nhexFile.ixPos--;
-					scrUpdate=true;
-					nhexFile.bHiLo=false;
-				}
+				iRes=nhexMvLeft(&nhexFile);
+				if(iRes == 1) scrUpdate=true;
+				if(iRes == 2) scrRedraw=true;
 				break;
 			case KEY_RIGHT:
-				if(nhexFile.iOff + nhexFile.iyPos * iChunks*8 + nhexFile.ixPos + 1 <= nhexFile.iFileLength - 1)
-				{
-					nhexScreenDetReset(&nhexFile);
-					nhexFile.ixPos++;
-					scrUpdate=true;
-					nhexFile.bHiLo=false;
-					if(nhexFile.ixPos == iChunks*8)
-					{
-						nhexFile.ixPos=0;
-						if(nhexFile.iyPos == iRows-1)
-						{
-							nhexFile.iOff+=iChunks*8;
-							scrRedraw=true;
-						}
-						else
-						{
-							nhexFile.iyPos++;
-						}
-					}
-				}
+				iRes=nhexMvRight(&nhexFile);
+				if(iRes == 1) scrUpdate=true;
+				if(iRes == 2) scrRedraw=true;
 				break;
 			case KEY_NPAGE:
 				if(nhexFile.iOff + iRows * iChunks*8 < nhexFile.iFileLength)
@@ -490,6 +528,8 @@ int main(int argc, char *argv[])
 						nhexFile.cChangeByte[nhexFile.iChangeCnt-1]=(nhexFile.cChangeByte[nhexFile.iChangeCnt-1] & 240) + cTmp;
 						nhexFile.bHiLo=false;
 						scrUpdate=true;
+						iRes=nhexMvRight(&nhexFile);
+						if(iRes == 2) scrRedraw=true;
 					}
 				}
 				else
@@ -506,6 +546,8 @@ int main(int argc, char *argv[])
 						nhexFile.cChangeByte[nhexFile.iChangeCnt]=c;
 						nhexFile.iChangeCnt++;
 						scrUpdate=true;
+						iRes=nhexMvRight(&nhexFile);
+						if(iRes == 2) scrRedraw=true;
 					}
 				}
 				break;
