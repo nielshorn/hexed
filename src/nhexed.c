@@ -37,9 +37,6 @@ static	int		iCols;		/* # of coluns available for output */
 static	int		iChunks;	/* # of 8-byte chunks per line */
 
 struct	nhexBuff	nhexFile;
-	//unsigned int	iChangeAddr[MAXCHANGE];
-	//unsigned char	cChangeByte[MAXCHANGE];
-	//int		iChangeCnt=0;
 
 /* Initialization */
 void nhexScreenSetup(void)
@@ -63,7 +60,6 @@ void nhexScreenSetup(void)
 }
 
 /* Show file */
-//void nhexScreenShow(FILE *fp, unsigned int iOff, unsigned int iFileLength)
 void nhexScreenShow(struct nhexBuff *nhexFile)
 {
 	unsigned int	i=0;
@@ -86,7 +82,6 @@ void nhexScreenShow(struct nhexBuff *nhexFile)
 		if(k%8 == 0 && k != -0)
 			spacer++;
 
-		//c=nhexFileReadPos(fp, iChangeAddr, cChangeByte, iChangeCnt, i, &style);
 		c=nhexFileReadPos(nhexFile, i, &style);
 		if(style == 'c') attron(A_REVERSE);
 		mvprintw(j+1, 11+k*3+spacer, "%02X", c);
@@ -123,7 +118,6 @@ void nhexScreenShow(struct nhexBuff *nhexFile)
 }
 
 /* Show details on screen */
-//void nhexScreenDetails(FILE *fp, char *pFileName, unsigned int iOff, int ixPos, int iyPos, bool bPos, bool bHiLo)
 void nhexScreenDetails(struct nhexBuff *nhexFile)
 {
 	char		sType[6], style;
@@ -132,10 +126,10 @@ void nhexScreenDetails(struct nhexBuff *nhexFile)
 	int		iChunkPos;
 	int		ixHexPos, ixAscPos, ixCurPos;
 
-	iPos=nhexFile->iOff + nhexFile->iyPos * 8 * iChunks + nhexFile->ixPos;
+	iPos=nhexFile->iOff + nhexFile->iyPos * iChunks*8 + nhexFile->ixPos;
 	iChunkPos=nhexFile->ixPos / 8;
 	ixHexPos=11+nhexFile->ixPos * 3 + iChunkPos;
-	ixAscPos=11+(iChunks*8) * 3 + (iChunks-1) + 2 + nhexFile->ixPos+iChunkPos;
+	ixAscPos=11+(iChunks*8) * 3 + (iChunks-1) + 2 + nhexFile->ixPos + iChunkPos;
 
 	if(nhexFile->bPos)
 	{
@@ -160,12 +154,11 @@ void nhexScreenDetails(struct nhexBuff *nhexFile)
 	attron(A_REVERSE);
 	mvprintw(iRows+1, 0, "%s", nhexFile->sFileName);
 	mvprintw(iRows+1, iCols-6, "|%s",sType);
-	mvprintw(iRows+1, iCols-22, "|%08i/%06X", iPos, iPos);
-	mvprintw(iRows+1, iCols-27, "|%04i", nhexFile->iChangeCnt);
+	mvprintw(iRows+1, iCols-26, "|%010u/%08X", iPos, iPos);
+	mvprintw(iRows+1, iCols-31, "|%04i", nhexFile->iChangeCnt);
 	attroff(A_REVERSE);
 
 	/* show edit-position */
-	//c=nhexFileReadPos(fp, iChangeAddr, cChangeByte, iChangeCnt, iPos, &style);
 	c=nhexFileReadPos(nhexFile, iPos, &style);
 	if(style == 'c') attron(A_REVERSE);
 	attron(A_BOLD | A_UNDERLINE);
@@ -182,7 +175,6 @@ void nhexScreenDetails(struct nhexBuff *nhexFile)
 }
 
 /* reset screen attributes on ixPos / iyPos */
-//void nhexScreenDetReset(FILE *fp, unsigned int iOff, int ixPos, int iyPos)
 void nhexScreenDetReset(struct nhexBuff *nhexFile)
 {
 	unsigned int	iPos;
@@ -195,7 +187,6 @@ void nhexScreenDetReset(struct nhexBuff *nhexFile)
 	ixHexPos=11 + nhexFile->ixPos * 3 + iChunkPos;
 	ixAscPos=11 + (iChunks*8) * 3 + (iChunks-1) + 2 + nhexFile->ixPos + iChunkPos;
 
-	//c=nhexFileReadPos(fp, iChangeAddr, cChangeByte, iChangeCnt, iPos, &style);
 	c=nhexFileReadPos(nhexFile, iPos, &style);
 	if(style == 'c') attron(A_REVERSE);
 	mvprintw(nhexFile->iyPos + 1, ixHexPos, "%02X",c);
@@ -240,17 +231,11 @@ int nhexSanityCheck(void)
 /* main entry point */
 int main(int argc, char *argv[])
 {
-	//FILE		*fp;
-	//unsigned int 	iFileLength, iOff=0;	/* Offset first byte on screen from file */
-	//int 		ixPos=0, iyPos=0;	/* Position of 'cursor' */
-	//bool 		bPos=false;		/* false = hex / true = ascii */
-	//bool 		bHiLo=false;		/* false = High / true = Low */
-	//char 		sFileName[MAXFILENAME];
 	struct nhexBuff	nhexFile;
 	int 		c;
 	bool 		ready, scrUpdate, scrRedraw;
-
-	unsigned char	cTmp;
+	unsigned int	iTmp;		/* temp address for moves etc. */
+	unsigned char	cTmp;		/* temp char for editing etc. */
 	char		style;
 
 	if(argc != 2)
@@ -282,6 +267,7 @@ int main(int argc, char *argv[])
 	nhexFile.iOff=0;				/* initial position */
 	nhexFile.ixPos=0;
 	nhexFile.iyPos=0;
+	nhexFile.iChangeCnt=0;
 	nhexFile.bPos=false;
 	nhexFile.bHiLo=false;
 	
@@ -422,9 +408,40 @@ int main(int argc, char *argv[])
 				scrRedraw=true;
 				break;
 			case 9:
+				/* tab - switch between hex & ascii */
 				nhexFile.bPos=!nhexFile.bPos;
 				nhexFile.bHiLo=false;
 				scrUpdate=true;
+				break;
+			case 24:
+				/* backspace - undo last change */
+				if(nhexFile.iChangeCnt>0)
+				{
+					iTmp=nhexFile.iChangeAddr[nhexFile.iChangeCnt-1];
+					if(iTmp >= nhexFile.iOff && iTmp<=nhexFile.iOff + iRows*iChunks*8 - 1)
+					{
+						/* last change is on the screen */
+						nhexScreenDetReset(&nhexFile);
+						nhexFile.iyPos=(iTmp - nhexFile.iOff) / (iChunks*8);
+						nhexFile.ixPos=(iTmp - nhexFile.iOff) % (iChunks*8);
+						scrUpdate=true;
+						nhexFile.bHiLo=false;
+					}
+					else
+					{
+						/* need to move the offset, try to center */
+						if(iTmp < (iRows/2) * (iChunks*8))
+							nhexFile.iOff=0;
+						else
+							nhexFile.iOff=(iTmp / (iChunks*8) - (iRows/2)) * (iChunks*8);
+						//if(nhexFile.iOff < 0) nhexFile.iOff=0;
+						nhexFile.iyPos=(iTmp - nhexFile.iOff) / (iChunks*8);
+						nhexFile.ixPos=iTmp % (iChunks*8);
+						scrRedraw=true;
+					}
+					nhexFile.iChangeCnt--;
+				}
+				break;
 			case 27:
 				/* menu */
 				break;

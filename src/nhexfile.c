@@ -54,7 +54,6 @@ FILE* nhexFileReadOpen(char *pFileName, unsigned int *iFileLength)
 }
 
 /* Return byte from file (or changes) */
-//char nhexFileReadPos(FILE *fp, unsigned int iChangeAddr[], unsigned char cChangeByte[], int iChangeCnt, unsigned int iAddr, char *style)
 char nhexFileReadPos(struct nhexBuff *nhexFile, unsigned int iAddr, char *style)
 {
 	int		i;

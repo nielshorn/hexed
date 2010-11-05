@@ -23,8 +23,8 @@
 #define MINCOLUMNS	45		/* 45=1 chunk, 34 for each extra chunk */
 #define MINROWS		3		/* minimal number of rows on screen */
 #define MAXLENGTH	4294967295	/* max file length 4GB for uint */
-#define MAXFILENAME	256		/* max length of filename */
-#define MAXCHANGE	10		/* maximum number of changes allowed */
+#define MAXFILENAME	255		/* max length of filename */
+#define MAXCHANGE	1000		/* maximum number of changes allowed */
 
 struct	nhexBuff {
 	FILE		*fp;			/* FILE pointer */
