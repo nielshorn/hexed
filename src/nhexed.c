@@ -31,12 +31,25 @@
 #include "nhexed.h"
 #include "nhexfile.h"
 #include "nhexmsg.h"
+#include "nhexmenu.h"
 
 static	int		iRows;		/* # of rows available for output */
 static	int		iCols;		/* # of coluns available for output */
 static	int		iChunks;	/* # of 8-byte chunks per line */
 
 struct	nhexBuff	nhexFile;
+
+/* Show standar header line */
+void nhexScreenHeader(void)
+{
+	mvprintw(0, 0, "%s-v%s",PACKAGE,VERSION);
+	clrtoeol();
+	mvprintw(0, iCols-21, "|Press <F12> for menu");
+	mvchgat(0, 0, -1, A_REVERSE, 0, NULL);
+	mvchgat(iRows+1, 0, -1, A_REVERSE, 0, NULL);
+
+	refresh();
+}
 
 /* Initialization */
 void nhexScreenSetup(void)
@@ -50,13 +63,9 @@ void nhexScreenSetup(void)
 	iRows=y-2;			/* -1 for menu, -1 for status */
 	iChunks=(iCols-45)/34+1;
 
-	mvprintw(0, 0, "%s-v%s",PACKAGE,VERSION);
-	mvprintw(0, iCols-21, "|Press <Esc> for menu");
-	mvchgat(0, 0, -1, A_REVERSE, 0, NULL);
-	mvchgat(iRows+1, 0, -1, A_REVERSE, 0, NULL);
+	nhexScreenHeader();
 
 	refresh();
-	return;
 }
 
 /* Show file */
@@ -480,8 +489,11 @@ int main(int argc, char *argv[])
 					nhexFile.iChangeCnt--;
 				}
 				break;
-			case 27:
+			case KEY_F(1):
+			case KEY_F(12):
 				/* menu */
+				iRes=nhexMenu();
+				scrRedraw=true;
 				break;
 			case KEY_CANCEL:
 				ready=true;
@@ -510,8 +522,8 @@ int main(int argc, char *argv[])
 						cTmp=cTmp*16;
 						if(nhexFile.iChangeCnt >= MAXCHANGE)
 						{
-							//nhexMsg(NHMSGERR + NHMSGOK, "Maximum number of changes reached");
-							nhexMsg(257, "Maximum number of changes reached");
+							nhexMsg(NHMSGWARN + NHMSGOK, "Maximum number of changes reached");
+							scrRedraw=true;
 							break;
 						}
 						/* calculate address & change high bits */
@@ -539,7 +551,8 @@ int main(int argc, char *argv[])
 					{
 						if(nhexFile.iChangeCnt >= MAXCHANGE)
 						{
-							nhexMsg(257, "Maximum number of changes reached");
+							nhexMsg(NHMSGWARN + NHMSGOK, "Maximum number of changes reached");
+							scrRedraw=true;
 							break;
 						}
 						nhexFile.iChangeAddr[nhexFile.iChangeCnt]=nhexFile.iOff + nhexFile.iyPos * iChunks*8 + nhexFile.ixPos;
@@ -554,6 +567,7 @@ int main(int argc, char *argv[])
 		}
 		if(scrRedraw)
 		{
+			nhexScreenHeader();
 			nhexScreenShow(&nhexFile);
 			nhexFile.bHiLo=false;
 		}

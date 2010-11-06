@@ -1,5 +1,5 @@
 /*
- * nhexmsg.h - header for message routines for nHex-Ed
+ * nhexmenug.c - menu routines for nHex-Ed
  *
  * Copyright (C) 2010 Niels Horn <niels.horn@gmail.com>
  *
@@ -20,16 +20,5 @@
  *
  */
 
-/* types of messages */
-#define NHMSGINFO	256
-#define NHMSGWARN	512
-#define NHMSGERR	1024
-
-/* "buttons" to include */
-#define NHMSGOK		1
-#define NHMSGYES	2
-#define NHMSGNO		4
-#define NHMSGCANCEL	8
-
-int nhexMsg(int flags, char *msg);
-
+int nhexMenu();
+int nhexSubMenu(int submenu);

@@ -18,5 +18,6 @@
 bin_PROGRAMS = nhexed
 nhexed_SOURCES = nhexed.c nhexed.h \
 		 nhexfile.c nhexfile.h nhex \
-		 nhexmsg.c nhexmsg.h
-LDADD = -lncurses
+		 nhexmsg.c nhexmsg.h \
+		 nhexmenu.c nhexmenu.h
+LDADD = -lncurses -lpanel

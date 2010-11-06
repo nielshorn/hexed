@@ -36,8 +36,7 @@ FILE* nhexFileReadOpen(char *pFileName, unsigned int *iFileLength)
 	fp = fopen(pFileName, "r+b");
 	if(fp == NULL)
 	{
-		//nhexMsg(NHMSGERR + NHMSGOK, "Cannot open file");
-		nhexMsg(257, "Cannot open file");
+		nhexMsg(NHMSGERR + NHMSGOK, "Cannot open file");
 		return NULL;
 	}
 	
@@ -46,7 +45,7 @@ FILE* nhexFileReadOpen(char *pFileName, unsigned int *iFileLength)
 
 	if(*iFileLength > MAXLENGTH)
 	{
-		printf("** File too large\n");
+		nhexMsg(NHMSGERR + NHMSGOK, "File too large");
 		return NULL;		/* file too large */
 	}
 
@@ -77,8 +76,7 @@ char nhexFileReadPos(struct nhexBuff *nhexFile, unsigned int iAddr, char *style)
 	{
 		if(fseek(nhexFile->fp, (long)iAddr, SEEK_SET))
 		{
-			//nhexMsg(NHMSGERR + NHMSGOK,"Seek error");
-			nhexMsg(257, "Seek error");
+			nhexMsg(NHMSGERR + NHMSGOK,"Seek error");
 			exit(1);
 		}
 		c=getc(nhexFile->fp);
