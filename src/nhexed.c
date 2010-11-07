@@ -1,7 +1,7 @@
 /*
  * nhexed.c - main program of nHex-Ed
  *
- * Copyright (C) 2010 Niels Horn <niels.horn@gmail.com>
+ * Copyright (C) 2003,2004,2010 Niels Horn <niels.horn@gmail.com>
  *
  * This program is free software; you can redistribute it and/or 
  * modify it under the terms of the GNU General Public License 
