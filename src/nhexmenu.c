@@ -1,5 +1,5 @@
 /*
- * nhexmenug.c - menu routines for nHex-Ed
+ * nhexmenu.c - menu routines for nHex-Ed
  *
  * Copyright (C) 2010 Niels Horn <niels.horn@gmail.com>
  *
