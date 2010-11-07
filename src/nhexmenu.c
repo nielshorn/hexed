@@ -147,8 +147,9 @@ int nhexMenu()
 						mvchgat(0, iItemPos[iItemSel]-strlen(sItem[iItemSel])-iItemBase + 1, \
 								strlen(sItem[iItemSel]), A_REVERSE, 0, NULL);
 						iItemSel=iResult-1;
-						mvchgat(0, iItemPos[iItemSel]-strlen(sItem[iItemSel])-iItemBase + 1, \
+						mvchgat(0, 1 + iItemPos[iItemSel]-strlen(sItem[iItemSel])-iItemBase, \
 								strlen(sItem[iItemSel]), 0, 0, NULL);
+						move(0, 1 + iItemPos[iItemSel]-strlen(sItem[iItemSel])-iItemBase + 1 );
 					}
 					else
 						break;
@@ -280,7 +281,6 @@ int nhexSubMenu(int submenu)
 	delwin(menuWin);
 	del_panel(menuPanel[1]);
 	del_panel(menuPanel[0]);
-	//refresh();
 	update_panels();
 	doupdate();
 	return iResult;
