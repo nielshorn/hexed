@@ -24,12 +24,16 @@
 #define NHMSGINFO	256
 #define NHMSGWARN	512
 #define NHMSGERR	1024
+#define NHMSGML		32768
 
 /* "buttons" to include */
 #define NHMSGOK		1
 #define NHMSGYES	2
 #define NHMSGNO		4
 #define NHMSGCANCEL	8
+
+#define MAXMSGLINES	20
+#define MAXMSGWIDTH	80
 
 int nhexMsg(int flags, char *msg);
 

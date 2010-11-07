@@ -63,25 +63,56 @@ int nhexMsg(int flags, char *msg)
 	int	iResult=0;
 	int	width, height;
 	int	pwidth, pheight;
+	int	mwidth, mheight;
 	WINDOW	*msgWin;
 	char	mType[10]="";
+	char	sMsg[MAXMSGLINES][MAXMSGWIDTH];
+	char	*p;
 	bool	ready=false;
 	int	iButSel=0;
-	int	c;
+	int	c, i;
 
+	/* ger max height, width */
+	getmaxyx(stdscr, pheight, pwidth);
+
+	/* choose buttons (bits 7-0) */
 	nButton=0;
 	strcpy(sButton, "");
-
-	getmaxyx(stdscr, pheight, pwidth);
 
 	if(flags & NHMSGCANCEL) msgButAdd("cancel", NHMSGCANCEL);
 	if(flags & NHMSGNO) msgButAdd("no", NHMSGNO);
 	if(flags & NHMSGYES) msgButAdd("yes", NHMSGYES);
 	if(flags & NHMSGOK) msgButAdd("ok", NHMSGOK);
 
+	/* check message */
+	if(flags & NHMSGML)		/* bit 15 */
+	{
+		/* multi-line message */
+		mwidth=0;
+		mheight=0;
+		p=strtok(msg, "\n");
+		while(p)
+		{
+			strncpy(sMsg[mheight], p, MAXMSGWIDTH);
+			mheight++;
+			if(strlen(p) > mwidth) mwidth=strlen(p);
+			p=strtok('\0', "\n");
+		}
+		mwidth+=4;
+	}
+	else
+	{
+		/* single-line message */
+		strncpy(sMsg[0], msg, MAXMSGWIDTH);
+		mheight=1;
+		mwidth=strlen(msg)+4;
+	}
+
+	/* check needed width */
+
 	if(strlen(msg) > strlen(sButton)+1)
 	{
-		width=strlen(msg)+4;
+		width=mwidth+4;
 	}
 	else
 	{
@@ -89,13 +120,15 @@ int nhexMsg(int flags, char *msg)
 	}
 
 	if(width > pwidth) width=pwidth;
-	height=6;
+	height=mheight+5;
+	if(height > pheight) height=pheight;	/* this means we'll need scrolling */
 
+	/* create window */
 	msgWin=msgBoxCreate(height, width, (pwidth - width)/2, (pheight - height)/2);
-	switch(flags & 65280)
+	switch(flags & 32512)		/* bits 14-8 */
 	{
 		case NHMSGINFO:
-			strcpy(mType, "INFO");
+			strcpy(mType, "INFO]");
 			break;
 		case NHMSGWARN:
 			strcpy(mType, "WARNING");
@@ -105,43 +138,52 @@ int nhexMsg(int flags, char *msg)
 			break;
 	}
 	wattroff(msgWin, A_REVERSE);
-	mvwprintw(msgWin,0,(width-strlen(mType))/2,"%s", mType);
+	mvwprintw(msgWin,0,(width-strlen(mType))/2-1,"[%s]", mType);
 	wattron(msgWin, A_REVERSE);
+
+	/* show actual message */
 	wattron(msgWin, A_BOLD);
-	mvwprintw(msgWin,2,1," %s ",msg);
+	for(i=0; i<mheight; i++)
+		mvwprintw(msgWin,2+i,2,"%s",sMsg[i]);
 	wattroff(msgWin, A_BOLD);
 
-	mvwprintw(msgWin,4,width-strlen(sButton)-1,sButton);
+	/* show buttons */
+	mvwprintw(msgWin,height-2,width-strlen(sButton)-1,sButton);
 
 	/* cycle through buttons */
 	iButPos[nButton]=strlen(sButton);
 	while(1)
 	{
-		mvwchgat(msgWin, 4, width-strlen(sButton)-1 + iButPos[iButSel], \
+		mvwchgat(msgWin, height-2, width-strlen(sButton)-1 + iButPos[iButSel], \
 				iButPos[iButSel+1]-iButPos[iButSel]-1, 0, 0, NULL);
-		wmove(msgWin, 4, width-strlen(sButton)-1 + iButPos[iButSel]+2);
+		wmove(msgWin, height-2, width-strlen(sButton)-1 + iButPos[iButSel]+2);
 		wrefresh(msgWin);
 		c=getch();
 		switch(c)
 		{
 			case KEY_LEFT:
 				if(iButSel > 0) iButSel--;
-				mvwchgat(msgWin, 4, 2, width-4, A_REVERSE, 0, NULL);
+				mvwchgat(msgWin, height-2, 2, width-4, A_REVERSE, 0, NULL);
 				break;
 			case KEY_RIGHT:
 				if(iButSel < nButton-1) iButSel++;
-				mvwchgat(msgWin, 4, 2, width-4, A_REVERSE, 0, NULL);
+				mvwchgat(msgWin, height-2, 2, width-4, A_REVERSE, 0, NULL);
 				break;
 			case KEY_HOME:
 				iButSel=0;
-				mvwchgat(msgWin, 4, 2, width-4, A_REVERSE, 0, NULL);
+				mvwchgat(msgWin, height-2, 2, width-4, A_REVERSE, 0, NULL);
 				break;
 			case KEY_END:
 				iButSel=nButton-1;
-				mvwchgat(msgWin, 4, 2, width-4, A_REVERSE, 0, NULL);
+				mvwchgat(msgWin, height-2, 2, width-4, A_REVERSE, 0, NULL);
+				break;
+			case KEY_UP:
+				/* scroll up */
+				break;
+			case KEY_DOWN:
+				/* scroll down */
 				break;
 			case KEY_ENTER:
-			case KEY_DOWN:
 			case 10:
 				iResult=iButVal[iButSel];
 				ready=true;

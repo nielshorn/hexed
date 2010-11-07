@@ -20,6 +20,10 @@
  *
  */
 
+#ifdef HAVE_CONFIG_H
+#include <config.h>
+#endif
+
 //#include <stdlib.h>
 #include <stdio.h>
 #include <stdbool.h>
@@ -30,7 +34,7 @@
 int nhexFunctions(int function, struct nhexBuff *nhexFile)
 {
 	int	iRes;
-	char	sMsg[30];
+	char	sMsg[MAXMSGLINES * MAXMSGWIDTH];
 	int	iReturn=0;
 	bool	exit=false;
 
@@ -40,7 +44,7 @@ int nhexFunctions(int function, struct nhexBuff *nhexFile)
 			/* edit - undo all */
 			if(nhexFile->iChangeCnt > 0)
 			{
-				snprintf(sMsg, 30, "Really discard %i changes?", nhexFile->iChangeCnt);
+				sprintf(sMsg, "Really discard %i changes?", nhexFile->iChangeCnt);
 				iRes=nhexMsg(NHMSGWARN + NHMSGNO + NHMSGYES, sMsg);
 				if(iRes == NHMSGYES) nhexFile->iChangeCnt=0;
 			}
@@ -50,7 +54,7 @@ int nhexFunctions(int function, struct nhexBuff *nhexFile)
 			if(nhexFile->iChangeCnt > 0)
 			{
 				/* unsaved changes, ask what to do */
-				snprintf(sMsg, 50, "File has %i changes. Save File?", nhexFile->iChangeCnt);
+				sprintf(sMsg, "File has %i changes. Save File?", nhexFile->iChangeCnt);
 				iRes=nhexMsg(NHMSGWARN + NHMSGCANCEL + NHMSGNO + NHMSGYES, sMsg);
 				switch(iRes)
 				{
@@ -67,6 +71,12 @@ int nhexFunctions(int function, struct nhexBuff *nhexFile)
 			}
 			else
 				exit=true;
+			break;
+		case 402:
+			/* help - about */
+			sprintf(sMsg, "%s %s\nOpen Source Hex Editor\n \n", PACKAGE, VERSION);
+			sprintf(sMsg, "%sby Niels Horn\nniels.horn@gmail.com",sMsg);
+			nhexMsg(NHMSGML + NHMSGINFO + NHMSGOK, sMsg);
 			break;
 	}
 	if(exit) iReturn=-1;
