@@ -30,6 +30,7 @@
 
 #include "nhexed.h"
 #include "nhexmsg.h"
+#include "nhexfile.h"
 
 int nhexFunctions(int function, struct nhexBuff *nhexFile)
 {
@@ -40,13 +41,15 @@ int nhexFunctions(int function, struct nhexBuff *nhexFile)
 
 	switch(function)
 	{
-		case 202:
-			/* edit - undo all */
+		case 102:
+			/* file - save */
 			if(nhexFile->iChangeCnt > 0)
 			{
-				sprintf(sMsg, "Really discard %i changes?", nhexFile->iChangeCnt);
-				iRes=nhexMsg(NHMSGWARN + NHMSGNO + NHMSGYES, sMsg);
-				if(iRes == NHMSGYES) nhexFile->iChangeCnt=0;
+				iRes=nhexFileSave(nhexFile, "");
+				if(iRes != 0)
+				{
+					nhexMsg(NHMSGERR + NHMSGOK, "Error writing file.");
+				}
 			}
 			break;
 		case 104:
@@ -63,7 +66,8 @@ int nhexFunctions(int function, struct nhexBuff *nhexFile)
 						break;
 					case NHMSGYES:
 						/* save file */
-						/* and fall throuhh to exit */
+						iRes=nhexFileSave(nhexFile, "");
+						if(iRes != 0) break;
 					case NHMSGNO:
 						exit=true;
 						break;
@@ -71,6 +75,27 @@ int nhexFunctions(int function, struct nhexBuff *nhexFile)
 			}
 			else
 				exit=true;
+			break;
+		case 202:
+			/* edit - undo all */
+			if(nhexFile->iChangeCnt > 0)
+			{
+				sprintf(sMsg, "Really discard %i changes?", nhexFile->iChangeCnt);
+				iRes=nhexMsg(NHMSGWARN + NHMSGNO + NHMSGYES, sMsg);
+				if(iRes == NHMSGYES) nhexFile->iChangeCnt=0;
+			}
+			break;
+		case 401:
+			/* help - help */
+			sprintf(sMsg, "Basic Help\n==========\n");
+			sprintf(sMsg, "%sLeft/Right/Up/Down       : Move Left/Right/Up/Down\n", sMsg);
+			sprintf(sMsg, "%sShift-Left / Shift-Right : Beginning / End of line\n", sMsg);
+			sprintf(sMsg, "%sPgUp / PgDown            : Move Up/Down one page\n", sMsg);
+			sprintf(sMsg, "%sHome/End                 : Beginning / End of file\n", sMsg);
+			sprintf(sMsg, "%sTab                      : Alternate between Hex/ASCII\n", sMsg);
+			sprintf(sMsg, "%s^X                       : Undo last change\n", sMsg);
+			sprintf(sMsg, "%sEsc / F1 / F12           : Goto Menu (Esc to leave)\n", sMsg);
+			nhexMsg(NHMSGML + NHMSGINFO + NHMSGOK, sMsg);
 			break;
 		case 402:
 			/* help - about */

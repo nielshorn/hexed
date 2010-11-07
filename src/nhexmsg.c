@@ -98,14 +98,13 @@ int nhexMsg(int flags, char *msg)
 			if(strlen(p) > mwidth) mwidth=strlen(p);
 			p=strtok('\0', "\n");
 		}
-		mwidth+=4;
 	}
 	else
 	{
 		/* single-line message */
 		strncpy(sMsg[0], msg, MAXMSGWIDTH);
 		mheight=1;
-		mwidth=strlen(msg)+4;
+		mwidth=strlen(msg);
 	}
 
 	/* check needed width */
@@ -128,7 +127,7 @@ int nhexMsg(int flags, char *msg)
 	switch(flags & 32512)		/* bits 14-8 */
 	{
 		case NHMSGINFO:
-			strcpy(mType, "INFO]");
+			strcpy(mType, "INFO");
 			break;
 		case NHMSGWARN:
 			strcpy(mType, "WARNING");

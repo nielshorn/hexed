@@ -52,6 +52,35 @@ FILE* nhexFileReadOpen(char *pFileName, unsigned int *iFileLength)
 	return fp;
 }
 
+/* Save file (save as pFileName if given) */
+int nhexFileSave(struct nhexBuff *nhexFile, char *pFileName)
+{
+	int	i;
+	int	iRet=0;
+
+	/*
+	 * TODO: copy to *pFileName if given
+	 */
+
+	/* loop through changes in order */
+	for(i=0; i<nhexFile->iChangeCnt; i++)
+	{
+		if(fseek(nhexFile->fp, (long)nhexFile->iChangeAddr[i], SEEK_SET))
+		{
+			nhexMsg(NHMSGERR + NHMSGOK, "Seek error while saving file");
+			iRet=1;
+			break;
+		}
+		else
+		{
+			putc(nhexFile->cChangeByte[i], nhexFile->fp);
+		}
+	}
+	if(iRet == 0) nhexFile->iChangeCnt=0;
+
+	return iRet;
+}
+
 /* Return byte from file (or changes) */
 char nhexFileReadPos(struct nhexBuff *nhexFile, unsigned int iAddr, char *style)
 {

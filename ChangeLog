@@ -1,5 +1,32 @@
-2010-11-02  Niels Horn <niels.horn@gmail.com>
+2010-11-07  Niels Horn <niels.horn@gmail.com>
 
- * src/nhexfile.h: new header for nhexfile.c
- * src/nhexfile.c: new file with file routines
- * src/nhexed.c: new main program file
+ * 2.00.01:	This is an alpha release, intended to show the idea of what
+		the final product should look like. Not all functions have
+		been implemented yet and many things will change still, but
+		feel free to take a test-drive and send your comments to me
+		:-)
+		This version has a maximum file-size limit of almost 4GB and
+		add multi-level undo history (up to 1000 changes).
+
+Older versions:
+
+2004-01-07
+ * 1.01.04:	Added *.BIN to filter to open files
+2003-07-13
+ * 1.01.03:	bugfix scrolltrack / resize
+2003-06-29
+ * 1.01.02:	ToolTips, New 'flat' toolbar with Exit & About-
+		button, file in command line / Vertical resizing
+2003-06-23
+ * 1.01.01:	MAXLENGTH 16MB, format filelength in caption,
+		Statusbar: Cur.pos./bPos/bHiLo
+		Search_Goto function, bugfix positioning after search
+2003-06-22
+ * 1.01.00:	Toolbar, Childwindow, Dialog for MessageBox,
+		Ctrl-Home/Ctrl-End
+2003-06-07
+ * 1.00.01:	Correction - timer causes crash when window is
+		minimized
+2003-06-06
+ * 1.00.00:	First version, bug in hex-find
+

@@ -21,5 +21,6 @@
  */
 
 FILE* nhexFileReadOpen(char *pFileName, unsigned int *iFileLength);
+int nhexFileSave(struct nhexBuff *nhexFile, char *pFileName);
 char nhexFileReadPos(struct nhexBuff *nhexFile, unsigned int iAddr, char *style);
 

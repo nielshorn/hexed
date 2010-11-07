@@ -391,7 +391,12 @@ int main(int argc, char *argv[])
 		scrUpdate=false;
 		scrRedraw=false;
 		switch(c)
-		{	case KEY_UP:
+		{
+			/*
+			 * TODO: include keys defined in menu
+			 * and call their functions
+			 */
+			case KEY_UP:
 				if(nhexFile.iyPos == 0)
 				{
 					if(nhexFile.iOff >= iChunks*8)
@@ -498,7 +503,7 @@ int main(int argc, char *argv[])
 				scrUpdate=true;
 				break;
 			case 24:
-				/* backspace - undo last change */
+				/* ^X - undo last change */
 				iRes=nhexUndoLast(&nhexFile);
 				if(iRes == 1) scrUpdate=true;
 				if(iRes == 2) scrRedraw=true;
@@ -597,6 +602,10 @@ int main(int argc, char *argv[])
 		}
 		if(scrUpdate || scrRedraw)
 			nhexScreenDetails(&nhexFile);
+		/*
+		 * TODO: Add routine to update menu here,
+		 * enabling "save" / "undo" if iChangeCnt != 0
+		 */
 		if(ready) break;
 	}
 

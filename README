@@ -1,12 +1,57 @@
 nHex-Ed
 =======
 
-nHex-Ed is a simple Hex Editor that uses the ncurses library.
+nHex-Ed is the "new" version of Hex-Ed, a simple Hex Editor.
+Copyright (c) 2003,2004,2010 Niels Horn <niels.horn@gmail.com>
 
-It is loosely based on Hex-Ed for Windows (1), which was based on earlier
-hex-editor written by me in C on CP/M and MS-DOS, so the origin of this
-program started a few decades ago...
+This is Free, Open-Source Software, released under the GNU General Public
+Licence (1).
 
-It is a work-in-progress and has several limitations, most importantly a
-maximum file size of 16MB.
+A word of caution
+-----------------
+This program gives you complete access to binary and executable files and 
+should always be used with caution: executing modified executables can have
+unpredictable results if you're not sure what you're doing.
+Always make a back-up copy before modifying any file!
 
+History
+-------
+nHex-Ed is loosely based on Hex-Ed for Windows (2), which itself was based on
+earlier hex-editors written by me in C on MS-DOS, and even before that in
+BASCOM on CP/M, so the origin of this program started a few decades ago...
+The oldest sources I still have are from 2003 (version 1.00.00 of Hex-Ed for
+Windows), so I'll keep that as the initial copyright year for nHex-Ed. :)
+
+Versions
+--------
+Please check the included ChangeLog for the version history.
+
+Feedback
+--------
+nHex-Ed is a work-in-progress and has room for several improvements, but for
+this to happen I need your feedback with suggestions, complaints, bug-reports
+etc.
+
+How to reach me
+---------------
+e-mail:		niels.horn@gmail.com
+homepage:	http://www.nielshorn.net/
+
+-----------------------------------------------------------------------------
+
+(1) This program is free software; you can redistribute it and/or 
+    modify it under the terms of the GNU General Public License 
+    as published by the Free Software Foundation; either 
+    version 2 of the License, or (at your option) any later
+    version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program; if not, write to the Free Software
+    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+
+(2) see: http://www.nielshorn.net/prog/old/hexed/ for the "old" Hex-Ed.
