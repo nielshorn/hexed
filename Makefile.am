@@ -1,4 +1,4 @@
-# Copyright 2010 Niels Horn <niels.horn@gmail.com>
+# Copyright 2003,2004,2010 Niels Horn <niels.horn@gmail.com>
 #
 # This program is free software; you can redistribute it and/or 
 # modify it under the terms of the GNU General Public License 

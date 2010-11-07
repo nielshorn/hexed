@@ -31,6 +31,7 @@ int	nButton=0;
 char	sButton[80]="";
 int	iButPos[11];			/* one longer to hold end position */
 int	iButVal[10];
+char	sButIndex[10];
 
 WINDOW *msgBoxCreate(int height, int width, int startx, int starty)
 {
@@ -54,6 +55,7 @@ void msgButAdd(char *button, int val)
 	iButPos[nButton]=strlen(sButton);
 	iButVal[nButton]=val;
 	sprintf(sButton, "%s[ %s ] ", sButton, button);
+	strncat(sButIndex, &button[0], 1);
 	nButton++;
 }
 
@@ -78,6 +80,7 @@ int nhexMsg(int flags, char *msg)
 	/* choose buttons (bits 7-0) */
 	nButton=0;
 	strcpy(sButton, "");
+	strcpy(sButIndex, "");
 
 	if(flags & NHMSGCANCEL) msgButAdd("cancel", NHMSGCANCEL);
 	if(flags & NHMSGNO) msgButAdd("no", NHMSGNO);
@@ -182,10 +185,20 @@ int nhexMsg(int flags, char *msg)
 			case KEY_DOWN:
 				/* scroll down */
 				break;
+			case 27:
+				/* escape should always go to <cancel> if included */
+				p=strchr(sButIndex,'c');
+				if(p) ready=true;
+				break;
 			case KEY_ENTER:
 			case 10:
 				iResult=iButVal[iButSel];
 				ready=true;
+				break;
+			default:
+				p=strchr(sButIndex, c);
+				if(p) iButSel=p-sButIndex;
+				mvwchgat(msgWin, height-2, 2, width-4, A_REVERSE, 0, NULL);
 				break;
 		}
 		if(ready) break;

@@ -135,6 +135,7 @@ void nhexScreenDetails(struct nhexBuff *nhexFile)
 	unsigned int	iPos;
 	int		iChunkPos;
 	int		ixHexPos, ixAscPos, ixCurPos;
+	char		*p;
 
 	iPos=nhexFile->iOff + nhexFile->iyPos * iChunks*8 + nhexFile->ixPos;
 	iChunkPos=nhexFile->ixPos / 8;
@@ -162,7 +163,14 @@ void nhexScreenDetails(struct nhexBuff *nhexFile)
 
 	/* show filename, pos & area */
 	attron(A_REVERSE);
-	mvprintw(iRows+1, 0, "%s", nhexFile->sFileName);
+	move(iRows+1, 0);
+	if(nhexFile->iChangeCnt) printw("+ ");
+	p=strrchr(nhexFile->sFileName,'/');
+	if(p)
+		p++;
+	else
+		p=nhexFile->sFileName-1;
+	printw("%s  ", p);
 	mvprintw(iRows+1, iCols-6, "|%s",sType);
 	mvprintw(iRows+1, iCols-26, "|%010u/%08X", iPos, iPos);
 	mvprintw(iRows+1, iCols-31, "|%04i", nhexFile->iChangeCnt);
