@@ -319,8 +319,10 @@ int main(int argc, char *argv[])
 				break;
 			case KEY_END:
 				nhexFile.iOff=(nhexFile.iFileLength-1) / (nhexScreen.iChunks*8);
-				nhexFile.iOff=(nhexFile.iOff - nhexScreen.iRows+1) * nhexScreen.iChunks*8;
-				if(nhexFile.iOff < 0) nhexFile.iOff=0;
+				if(nhexFile.iOff < nhexScreen.iRows+1)
+					nhexFile.iOff=0;
+				else
+					nhexFile.iOff=(nhexFile.iOff - nhexScreen.iRows+1) * nhexScreen.iChunks*8;
 				nhexFile.iyPos=(nhexFile.iFileLength-1 - nhexFile.iOff) / (nhexScreen.iChunks*8);
 				nhexFile.ixPos=(nhexFile.iFileLength-1) % (nhexScreen.iChunks*8);
 				scrRedraw=true;
