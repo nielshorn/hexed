@@ -20,6 +20,10 @@
  *
  */
 
+#ifdef HAVE_CONFIG_H
+#include <config.h>
+#endif
+
 #define MINCOLUMNS	45		/* 45=1 chunk, 34 for each extra chunk */
 #define MINROWS		9		/* minimal number of rows on screen */
 #define MAXLENGTH	4294967295	/* max file length 4GB for uint */
