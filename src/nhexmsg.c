@@ -23,6 +23,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <ncurses.h>
+#include <panel.h>
 
 #include "nhexed.h"
 #include "nhexmsg.h"
@@ -67,6 +68,7 @@ int nhexMsg(int flags, char *msg)
 	int	pwidth, pheight;
 	int	mwidth, mheight;
 	WINDOW	*msgWin;
+	PANEL	*msgPanel[2];
 	char	mType[10]="";
 	char	sMsg[MAXMSGLINES][MAXMSGWIDTH];
 	char	*p;
@@ -126,7 +128,9 @@ int nhexMsg(int flags, char *msg)
 	if(height > pheight) height=pheight;	/* this means we'll need scrolling */
 
 	/* create window */
+	msgPanel[0]=new_panel(stdscr);
 	msgWin=msgBoxCreate(height, width, (pwidth - width)/2, (pheight - height)/2);
+	msgPanel[1]=new_panel(msgWin);
 	switch(flags & 32512)		/* bits 14-8 */
 	{
 		case NHMSGINFO:
@@ -160,6 +164,8 @@ int nhexMsg(int flags, char *msg)
 				iButPos[iButSel+1]-iButPos[iButSel]-1, 0, 0, NULL);
 		wmove(msgWin, height-2, width-strlen(sButton)-1 + iButPos[iButSel]+2);
 		wrefresh(msgWin);
+		update_panels();
+		doupdate();
 		c=getch();
 		switch(c)
 		{
@@ -205,6 +211,10 @@ int nhexMsg(int flags, char *msg)
 	}
 
 	msgBoxDestroy(msgWin);
+	del_panel(msgPanel[1]);
+	del_panel(msgPanel[0]);
+	update_panels();
+	doupdate();
 	refresh();
 
 	return iResult;
