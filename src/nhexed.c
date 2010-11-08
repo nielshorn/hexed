@@ -170,12 +170,12 @@ int main(int argc, char *argv[])
 	unsigned char	cTmp;		/* temp char for editing etc. */
 	char		style;
 
+	/* verifiy and process command-line options */
 	if(argc != 2)
 	{
 		printf("Usage: %s <file_to_edit>\n", argv[0]);
 		exit(1);
 	}
-
 	if(strlen(argv[1]) > MAXFILENAME)
 	{
 		printf("** Filename too long (max=%i)",MAXFILENAME);
@@ -183,16 +183,18 @@ int main(int argc, char *argv[])
 	}
 	strcpy(nhexFile.sFileName,argv[1]);
 
+	/* check if we have a capable terminal */
 	if(nhexSanityCheck())
 	{
 		exit(1);
 	}
 
+	/* open file and start editing! */
 	nhexFile.fp=nhexFileReadOpen(nhexFile.sFileName, &nhexFile.iFileLength);
 	if (nhexFile.fp == NULL)
 	{
-		//perror("Cannot open file");
-		printf("** Error opening file\n");
+		/* did not work :( Clean up & exit */
+		nhexCleanup();
 		exit(1);
 	}
 
