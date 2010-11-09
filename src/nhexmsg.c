@@ -76,7 +76,7 @@ int nhexMsg(int flags, char *msg)
 	int	iButSel=0;
 	int	c, i;
 
-	/* ger max height, width */
+	/* get max height, width */
 	getmaxyx(stdscr, pheight, pwidth);
 
 	/* choose buttons (bits 7-0) */

@@ -161,15 +161,17 @@ void nhexScreenDetails(struct nhexBuff *nhexFile)
 	}
 
 	/* show filename, pos & area */
-	attron(A_REVERSE);
 	move(nhexScreen.iRows+1, 0);
+	clrtoeol();
+	chgat(-1, A_REVERSE, 0, NULL);
+	attron(A_REVERSE);
 	if(nhexFile->iChangeCnt) printw("+ ");
 	p=strrchr(nhexFile->sFileName,'/');
 	if(p)
 		p++;
 	else
 		p=nhexFile->sFileName;
-	printw("%s  ", p);
+	printw("%s", p);
 	mvprintw(nhexScreen.iRows+1, nhexScreen.iCols-6, "|%s",sType);
 	mvprintw(nhexScreen.iRows+1, nhexScreen.iCols-26, "|%010u/%08X", iPos, iPos);
 	mvprintw(nhexScreen.iRows+1, nhexScreen.iCols-31, "|%04i", nhexFile->iChangeCnt);

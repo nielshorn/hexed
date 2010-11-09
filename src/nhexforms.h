@@ -1,5 +1,5 @@
 /*
- * nhexfile.h - header for file routines for nHex-Ed
+ * nhexforms.c - header for forms routines for nHex-Ed
  *
  * Copyright (C) 2003,2004,2010 Niels Horn <niels.horn@gmail.com>
  *
@@ -20,8 +20,4 @@
  *
  */
 
-int	nhexFileGetName(char *newFile, int flags);
-FILE*	nhexFileReadOpen(char *pFileName, unsigned int *iFileLength);
-char	nhexFileReadPos(struct nhexBuff *nhexFile, unsigned int iAddr, char *style);
-int	nhexFileSave(struct nhexBuff *nhexFile, char *pFileName);
-
+int nhexFrmInput(char *pTitle, char *pQuestion, char *pAnswer, int length);

@@ -27,6 +27,7 @@
 //#include <stdlib.h>
 #include <stdio.h>
 #include <stdbool.h>
+#include <string.h>
 
 #include "nhexed.h"
 #include "nhexmsg.h"
@@ -36,11 +37,18 @@ int nhexFunctions(int function, struct nhexBuff *nhexFile)
 {
 	int	iRes;
 	char	sMsg[MAXMSGLINES * MAXMSGWIDTH];
+	char	newFile[MAXFILENAME];
 	int	iReturn=0;
 	bool	exit=false;
 
 	switch(function)
 	{
+		case 101:
+			/* file - open */
+			//1-Check for unsaved changes & offer to save
+			//2-nhexFileGetName(newFile, 0);
+			//3-open file & reset offset
+			break;
 		case 102:
 			/* file - save */
 			if(nhexFile->iChangeCnt > 0)
@@ -51,6 +59,13 @@ int nhexFunctions(int function, struct nhexBuff *nhexFile)
 					nhexMsg(NHMSGERR + NHMSGOK, "Error writing file.");
 				}
 			}
+			break;
+		case 103:
+			/* file - save as... */
+			strcpy(newFile,nhexFile->sFileName);
+			iRes=nhexFileGetName(newFile, 1);	/* 1=get new name for existing file */
+			if(iRes)
+				iRes=nhexFileSave(nhexFile, newFile);
 			break;
 		case 104:
 			/* file - exit */
