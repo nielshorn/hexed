@@ -38,6 +38,7 @@ int nhexFunctions(int function, struct nhexBuff *nhexFile)
 	int	iRes;
 	char	sMsg[MAXMSGLINES * MAXMSGWIDTH];
 	char	newFile[MAXFILENAME];
+	char	*p;
 	int	iReturn=0;
 	bool	exit=false;
 
@@ -62,7 +63,12 @@ int nhexFunctions(int function, struct nhexBuff *nhexFile)
 			break;
 		case 103:
 			/* file - save as... */
-			strcpy(newFile,nhexFile->sFileName);
+			p=strrchr(nhexFile->sFileName,'/');
+			if(p)
+				p++;
+			else
+				p=nhexFile->sFileName;
+			strcpy(newFile,p);
 			iRes=nhexFileGetName(newFile, 1);	/* 1=get new name for existing file */
 			if(iRes)
 				iRes=nhexFileSave(nhexFile, newFile);
