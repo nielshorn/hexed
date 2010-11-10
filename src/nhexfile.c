@@ -67,6 +67,17 @@ FILE* nhexFileReadOpen(char *pFileName, unsigned int *iFileLength)
 	return fp;
 }
 
+/* reset offset, position, etc. */
+void nhexFileReset(struct nhexBuff *nhexFile)
+{
+	nhexFile->iOff=0;				/* initial position */
+	nhexFile->ixPos=0;
+	nhexFile->iyPos=0;
+	nhexFile->iChangeCnt=0;
+	nhexFile->bPos=false;
+	nhexFile->bHiLo=false;
+}
+
 /* Save file (save as pFileName if given) */
 int nhexFileSave(struct nhexBuff *nhexFile, char *pFileName)
 {

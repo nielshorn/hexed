@@ -99,7 +99,7 @@ int nhexMvRight(struct nhexBuff *nhexFile)
 {
 	int result=0;			/* 0=nothing, 1=update, 2=redraw */
 
-	if(nhexFile->iOff + nhexFile->iyPos * nhexScreen.iChunks*8 + nhexFile->ixPos + 1 <= nhexFile->iFileLength - 1)
+	if(nhexFile->iOff + nhexFile->iyPos * nhexScreen.iChunks*8 + nhexFile->ixPos +1 +1 <= nhexFile->iFileLength)
 	{
 		nhexScreenDetReset(nhexFile);
 		nhexFile->ixPos++;
@@ -197,13 +197,10 @@ int main(int argc, char *argv[])
 		nhexCleanup();
 		exit(1);
 	}
-
-	nhexFile.iOff=0;				/* initial position */
-	nhexFile.ixPos=0;
-	nhexFile.iyPos=0;
-	nhexFile.iChangeCnt=0;
-	nhexFile.bPos=false;
-	nhexFile.bHiLo=false;
+	else
+	{
+		nhexFileReset(&nhexFile);
+	}
 	
 	nhexScreenSetup(&nhexScreen);
 	nhexScreenShow(&nhexFile);
@@ -243,7 +240,7 @@ int main(int argc, char *argv[])
 				}
 				break;
 			case KEY_DOWN:
-				if(nhexFile.iOff + (nhexFile.iyPos+1) * nhexScreen.iChunks*8 + nhexFile.ixPos <= nhexFile.iFileLength - 1)
+				if(nhexFile.iOff + (nhexFile.iyPos+1) * nhexScreen.iChunks*8 + nhexFile.ixPos +1 <= nhexFile.iFileLength)
 				{
 					if(nhexFile.iyPos == nhexScreen.iRows-1)
 					{
@@ -440,7 +437,7 @@ int main(int argc, char *argv[])
 		if(ready) break;
 	}
 
-	fclose(nhexFile.fp);
+	if(nhexFile.fp) fclose(nhexFile.fp);
 
 	nhexCleanup();
 	return 0;

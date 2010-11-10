@@ -37,7 +37,6 @@ void nhexScreenHeader(void)
 	mvprintw(0, nhexScreen.iCols-21, "|Press <F12> for menu");
 	mvchgat(0, 0, -1, A_REVERSE, 0, NULL);
 	mvchgat(nhexScreen.iRows+1, 0, -1, A_REVERSE, 0, NULL);
-
 	refresh();
 }
 
@@ -77,7 +76,7 @@ void nhexScreenShow(struct nhexBuff *nhexFile)
 {
 	unsigned int	i=0;
 	int		j=-1;
-	int		k, spacer;
+	int		k=0, spacer;
 	int		ixHexPos, ixAscPos;
 
 	for(i=nhexFile->iOff; i < nhexFile->iFileLength; i++)
@@ -87,7 +86,9 @@ void nhexScreenShow(struct nhexBuff *nhexFile)
 			j++;
 			k=0;
 			spacer=0;
-			mvprintw(j+1, 0, "%08X | ", i);
+			move(j+1, 0);
+			clrtoeol();
+			printw("%08X | ", i);
 			mvprintw(j+1, 11 + (nhexScreen.iChunks*8)*3 + (nhexScreen.iChunks-1), "|");
 		}
 
@@ -166,24 +167,31 @@ void nhexScreenDetails(struct nhexBuff *nhexFile)
 	chgat(-1, A_REVERSE, 0, NULL);
 	attron(A_REVERSE);
 	if(nhexFile->iChangeCnt) printw("+ ");
-	p=strrchr(nhexFile->sFileName,'/');
-	if(p)
-		p++;
-	else
-		p=nhexFile->sFileName;
-	printw("%s", p);
+	if(nhexFile->fp)
+	{
+		p=strrchr(nhexFile->sFileName,'/');
+		if(p)
+			p++;
+		else
+			p=nhexFile->sFileName;
+		printw("%s", p);
+	}
 	mvprintw(nhexScreen.iRows+1, nhexScreen.iCols-6, "|%s",sType);
 	mvprintw(nhexScreen.iRows+1, nhexScreen.iCols-26, "|%010u/%08X", iPos, iPos);
 	mvprintw(nhexScreen.iRows+1, nhexScreen.iCols-31, "|%04i", nhexFile->iChangeCnt);
 	attroff(A_REVERSE);
 
-	/* show edit-position */
-	nhexScreenShowByte(nhexFile, iPos, nhexFile->iyPos, ixHexPos, ixAscPos);
+	/* show edit-position & set cursor */
+	if(nhexFile->fp){
+		nhexScreenShowByte(nhexFile, iPos, nhexFile->iyPos, ixHexPos, ixAscPos);
+		move(nhexFile->iyPos + 1,ixCurPos);
+	}
+	else
+		mvprintw(nhexScreen.iRows/2, (nhexScreen.iCols-19)/2, "Open a file to edit");
 
 	refresh();
 
 	/* set cursor on right position */
-	move(nhexFile->iyPos + 1,ixCurPos);
 	return;
 }
 
@@ -198,7 +206,8 @@ void nhexScreenDetReset(struct nhexBuff *nhexFile)
 	ixHexPos=11 + nhexFile->ixPos * 3 + iChunkPos;
 	ixAscPos=11 + (nhexScreen.iChunks*8) * 3 + (nhexScreen.iChunks-1) + 2 + nhexFile->ixPos + iChunkPos;
 
-	nhexScreenShowByte(nhexFile, iPos, nhexFile->iyPos, ixHexPos, ixAscPos);
+	if(nhexFile->fp)
+		nhexScreenShowByte(nhexFile, iPos, nhexFile->iyPos, ixHexPos, ixAscPos);
 
 	return;
 }

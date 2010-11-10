@@ -35,20 +35,54 @@
 
 int nhexFunctions(int function, struct nhexBuff *nhexFile)
 {
-	int	iRes;
-	char	sMsg[MAXMSGLINES * MAXMSGWIDTH];
-	char	newFile[MAXFILENAME];
-	char	*p;
-	int	iReturn=0;
-	bool	exit=false;
+	int		iRes;
+	char		sMsg[MAXMSGLINES * MAXMSGWIDTH];
+	char		newFile[MAXFILENAME]="";
+	char		*p;
+	int		iReturn=0;
+	bool		exit=false;
 
 	switch(function)
 	{
 		case 101:
 			/* file - open */
-			//1-Check for unsaved changes & offer to save
-			//2-nhexFileGetName(newFile, 0);
-			//3-open file & reset offset
+			if(nhexFile->iChangeCnt > 0)
+			{
+				sprintf(sMsg, "File has %i changes. Save current file first?", nhexFile->iChangeCnt);
+				iRes=nhexMsg(NHMSGWARN + NHMSGCANCEL + NHMSGNO + NHMSGYES, sMsg);
+				switch(iRes)
+				{
+					case NHMSGCANCEL:
+						/* do nothing, just return */
+						break;
+					case NHMSGYES:
+						/* save file */
+						iRes=nhexFileSave(nhexFile, "");
+						if(iRes != 0) break;
+					case NHMSGNO:
+						exit=true;
+						break;
+				}
+			}
+			else
+				exit=true;
+			if(exit)
+			{
+				if(nhexFile->fp)
+				{
+					fclose(nhexFile->fp);
+					nhexFileReset(nhexFile);
+					nhexFile->fp=NULL;
+				}
+				iRes=nhexFileGetName(newFile, 0);
+				if(iRes)
+				{
+					strcpy(nhexFile->sFileName,newFile);
+					nhexFile->fp=nhexFileReadOpen(nhexFile->sFileName, &nhexFile->iFileLength);
+				}
+				if(nhexFile->fp == NULL) nhexFile->iFileLength=0;
+				exit=false;
+			}
 			break;
 		case 102:
 			/* file - save */
