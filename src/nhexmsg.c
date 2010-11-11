@@ -78,6 +78,15 @@ int nhexMsg(int flags, char *msg)
 
 	/* get max height, width */
 	getmaxyx(stdscr, pheight, pwidth);
+	if(pheight == -1 || pwidth == -1)
+	{
+		/* we're at the command line! */
+		if(flags & NHMSGERR)
+			fprintf(stderr, "** %s\n", msg);
+		else
+			printf("%s\n", msg);
+		return NHMSGOK;
+	}
 
 	/* choose buttons (bits 7-0) */
 	nButton=0;

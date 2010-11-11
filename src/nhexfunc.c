@@ -86,7 +86,7 @@ int nhexFunctions(int function, struct nhexBuff *nhexFile)
 			break;
 		case 102:
 			/* file - save */
-			if(nhexFile->iChangeCnt > 0)
+			if(nhexFile->fp)
 			{
 				iRes=nhexFileSave(nhexFile, "");
 				if(iRes != 0)
@@ -97,15 +97,18 @@ int nhexFunctions(int function, struct nhexBuff *nhexFile)
 			break;
 		case 103:
 			/* file - save as... */
-			p=strrchr(nhexFile->sFileName,'/');
-			if(p)
-				p++;
-			else
-				p=nhexFile->sFileName;
-			strcpy(newFile,p);
-			iRes=nhexFileGetName(newFile, 1);	/* 1=get new name for existing file */
-			if(iRes)
-				iRes=nhexFileSave(nhexFile, newFile);
+			if(nhexFile->fp)
+			{
+				p=strrchr(nhexFile->sFileName,'/');
+				if(p)
+					p++;
+				else
+					p=nhexFile->sFileName;
+				strcpy(newFile,p);
+				iRes=nhexFileGetName(newFile, 1);	/* 1=get new name for existing file */
+				if(iRes)
+					iRes=nhexFileSave(nhexFile, newFile);
+			}
 			break;
 		case 104:
 			/* file - exit */

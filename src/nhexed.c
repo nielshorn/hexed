@@ -20,9 +20,11 @@
  *
  */
 
-#include <ncurses.h>
 #include <stdlib.h>
 #include <string.h>
+
+#include <unistd.h>
+#include <ncurses.h>
 
 #include "nhexed.h"
 #include "nhexfile.h"
@@ -33,14 +35,6 @@
 
 struct	nhexBuff	nhexFile;
 struct 	Screen		nhexScreen;
-
-/* Cleanup */
-void nhexCleanup(void)
-{
-	clrtoeol();
-	endwin();
-	return;
-}
 
 /* Check for minimal window size etc. */
 int nhexSanityCheck(void)
@@ -54,12 +48,12 @@ int nhexSanityCheck(void)
 
 	if (x < MINCOLUMNS)
 	{
-		printf("** Columns = %i, minimum = %i\n", x, MINCOLUMNS);
+		fprintf(stderr, "** Columns = %i, minimum = %i\n", x, MINCOLUMNS);
 		ret = 1;
 	}
 	if (y < MINROWS)
 	{
-		printf("** Rows = %i, minimum = %i\n", y, MINROWS);
+		fprintf(stderr, "** Rows = %i, minimum = %i\n", y, MINROWS);
 		ret = 1;
 	}
 	return ret;
@@ -162,6 +156,7 @@ int nhexUndoLast(struct nhexBuff *nhexFile)
 /* main entry point */
 int main(int argc, char *argv[])
 {
+	int		opt;
 	struct nhexBuff	nhexFile;
 	int 		c;
 	bool 		ready, scrUpdate, scrRedraw;
@@ -171,36 +166,49 @@ int main(int argc, char *argv[])
 	char		style;
 
 	/* verifiy and process command-line options */
-	if(argc != 2)
+	while((opt=getopt(argc, argv, "v")) != -1)
 	{
-		printf("Usage: %s <file_to_edit>\n", argv[0]);
-		exit(1);
-	}
-	if(strlen(argv[1]) > MAXFILENAME)
-	{
-		printf("** Filename too long (max=%i)",MAXFILENAME);
-		exit(1);
-	}
-	strcpy(nhexFile.sFileName,argv[1]);
-
-	/* check if we have a capable terminal */
-	if(nhexSanityCheck())
-	{
-		exit(1);
+		switch(opt)
+		{
+			case 'v':
+				printf("%s - Version %s\n", PACKAGE, VERSION);
+				exit(0);
+			default:
+				fprintf(stderr, "** Usage: %s [-v] | [filename]\n", argv[0]);
+				exit(1);
+		}
 	}
 
-	/* open file and start editing! */
-	nhexFile.fp=nhexFileReadOpen(nhexFile.sFileName, &nhexFile.iFileLength);
-	if (nhexFile.fp == NULL)
+	if(optind < argc)
 	{
-		/* did not work :( Clean up & exit */
-		nhexCleanup();
-		exit(1);
+		/* filename given in command line */
+		if(strlen(argv[optind]) > MAXFILENAME)
+		{
+			fprintf(stderr, "** Filename too long (max=%i)\n", MAXFILENAME);
+			exit(1);
+		}
+		/* open file and start editing! */
+		strcpy(nhexFile.sFileName, argv[optind]);
+		nhexFileReset(&nhexFile);
+		nhexFile.fp=nhexFileReadOpen(nhexFile.sFileName, &nhexFile.iFileLength);
+		if (nhexFile.fp == NULL)
+		{
+			/* did not work :( Clean up & exit */
+			fprintf(stderr, "** Unable to open %s\n", nhexFile.sFileName);
+			exit(1);
+		}
 	}
 	else
 	{
+		/* no filename given */
+		strcpy(nhexFile.sFileName, "");
 		nhexFileReset(&nhexFile);
+		nhexFile.iFileLength=0;
 	}
+
+	/* check if we have a capable terminal */
+	if(nhexSanityCheck())
+		exit(1);
 	
 	nhexScreenSetup(&nhexScreen);
 	nhexScreenShow(&nhexFile);
@@ -433,12 +441,13 @@ int main(int argc, char *argv[])
 		/*
 		 * TODO: Add routine to update menu here,
 		 * enabling "save" / "undo" if iChangeCnt != 0
+		 * diabling if fp=null, etc.
 		 */
 		if(ready) break;
 	}
 
 	if(nhexFile.fp) fclose(nhexFile.fp);
 
-	nhexCleanup();
+	endwin();
 	return 0;
 }

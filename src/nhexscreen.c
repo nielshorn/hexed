@@ -191,7 +191,6 @@ void nhexScreenDetails(struct nhexBuff *nhexFile)
 
 	refresh();
 
-	/* set cursor on right position */
 	return;
 }
 
