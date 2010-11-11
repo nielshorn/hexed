@@ -166,15 +166,22 @@ int main(int argc, char *argv[])
 	char		style;
 
 	/* verifiy and process command-line options */
-	while((opt=getopt(argc, argv, "v")) != -1)
+	while((opt=getopt(argc, argv, "hv")) != -1)
 	{
 		switch(opt)
 		{
+			case 'h':
+				printf("Usage: %s [options] [filename]\n\n", PACKAGE);
+				printf("Options:\n");
+				printf("  -h            Print this help text and exit\n");
+				printf("  -v            Print the version number and exit\n");
+				printf("\nReport bugs to <niels.horn@gmail.com>\n");
+				exit(0);
 			case 'v':
 				printf("%s - Version %s\n", PACKAGE, VERSION);
 				exit(0);
 			default:
-				fprintf(stderr, "** Usage: %s [-v] | [filename]\n", argv[0]);
+				fprintf(stderr, "** Usage: %s [-hv] | [filename]\n", argv[0]);
 				exit(1);
 		}
 	}
@@ -441,7 +448,7 @@ int main(int argc, char *argv[])
 		/*
 		 * TODO: Add routine to update menu here,
 		 * enabling "save" / "undo" if iChangeCnt != 0
-		 * diabling if fp=null, etc.
+		 * disabling if fp=null, etc.
 		 */
 		if(ready) break;
 	}
