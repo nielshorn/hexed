@@ -20,5 +20,5 @@
  *
  */
 
-int nhexFunctions(int function, struct nhexBuff *nhexFile);
+int nhexFunctions(int function, struct nhexBuff *nhexFile, struct Screen *nhexScreen);
 

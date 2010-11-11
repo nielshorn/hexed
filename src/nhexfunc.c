@@ -32,12 +32,16 @@
 #include "nhexed.h"
 #include "nhexmsg.h"
 #include "nhexfile.h"
+#include "nhexforms.h"
+#include "nhexscreen.h"
 
-int nhexFunctions(int function, struct nhexBuff *nhexFile)
+int nhexFunctions(int function, struct nhexBuff *nhexFile, struct Screen *nhexScreen)
 {
 	int		iRes;
 	char		sMsg[MAXMSGLINES * MAXMSGWIDTH];
 	char		newFile[MAXFILENAME]="";
+	char		newPos[11];
+	unsigned int	iPos;
 	char		*p;
 	int		iReturn=0;
 	bool		exit=false;
@@ -141,6 +145,35 @@ int nhexFunctions(int function, struct nhexBuff *nhexFile)
 				sprintf(sMsg, "Really discard %i changes?", nhexFile->iChangeCnt);
 				iRes=nhexMsg(NHMSGWARN + NHMSGNO + NHMSGYES, sMsg);
 				if(iRes == NHMSGYES) nhexFile->iChangeCnt=0;
+			}
+			break;
+		case 303:
+			/* search - goto */
+			if(nhexFile->fp)
+			{
+				iPos=nhexFile->iOff + nhexFile->iyPos*nhexScreen->iChunks*8 + nhexFile->ixPos;
+				if(iPos == 0)
+					strcpy(newPos,"");
+				else
+					sprintf(newPos, "%i", iPos);
+				iRes=nhexFrmInput("Goto...", "Address (end with 'h' for hex):", newPos, 10);
+				if(iRes)
+				{
+					if(newPos[strlen(newPos)-1] == 'h')
+						iRes=sscanf(newPos, "%X", &iPos);
+					else
+						iRes=sscanf(newPos, "%i", &iPos);
+					if(iPos < nhexFile->iFileLength)
+					{
+						nhexFile->iOff=(iPos/(nhexScreen->iChunks*8)) * (nhexScreen->iChunks*8);
+						nhexFile->ixPos=iPos-nhexFile->iOff;
+						nhexFile->iyPos=0;
+					}
+					else
+					{
+						nhexMsg(NHMSGERR + NHMSGOK, "Address out of range");
+					}
+				}
 			}
 			break;
 		case 401:

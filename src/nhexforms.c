@@ -67,7 +67,7 @@ int nhexFrmInput(char *pTitle, char *pQuestion, char *pAnswer, int length)
 	 */
 
 	/* set up form */
-	field[0]=new_field(1, maxWidth, 0, 0, 0, 0);
+	field[0]=new_field(1, strlen(pQuestion), 0, 0, 0, 0);
 	field[1]=new_field(1, maxWidth, 1, 0, 0, 0);
 	field[2]=NULL;
 	set_field_buffer(field[0], 0, pQuestion);

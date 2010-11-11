@@ -201,7 +201,7 @@ int main(int argc, char *argv[])
 		if (nhexFile.fp == NULL)
 		{
 			/* did not work :( Clean up & exit */
-			fprintf(stderr, "** Unable to open %s\n", nhexFile.sFileName);
+			fprintf(stderr, "** Unable to open '%s'\n", nhexFile.sFileName);
 			exit(1);
 		}
 	}
@@ -359,14 +359,14 @@ int main(int argc, char *argv[])
 				if(iRes == 201)
 					iRes=nhexUndoLast(&nhexFile);
 				else if(iRes != 0)
-					iRes=nhexFunctions(iRes, &nhexFile);
+					iRes=nhexFunctions(iRes, &nhexFile, &nhexScreen);
 				if(iRes == -1)
 					ready=true;
 				else
 					scrRedraw=true;
 				break;
 			case KEY_CANCEL:
-				iRes=nhexFunctions(104, &nhexFile);
+				iRes=nhexFunctions(104, &nhexFile, &nhexScreen);
 				if(iRes == -1)
 					ready=true;
 				break;
