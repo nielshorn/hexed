@@ -20,5 +20,5 @@
  *
  */
 
-int nhexFind(struct nhexBuff *nhexFile, char *sFind, unsigned int *iPos);
+int nhexFind(struct nhexBuff *nhexFile, char *sFind, long *iPos);
 

@@ -44,6 +44,7 @@ int nhexFunctions(int function, struct nhexBuff *nhexFile, struct Screen *nhexSc
 	char		newPos[11];
 static	char		newSearch[256]="";
 	unsigned int	iPos;
+	long		lPos;
 	char		*p;
 	int		iReturn=0;
 	bool		exit=false;
@@ -168,16 +169,32 @@ static	char		newSearch[256]="";
 						newSearch[i]='\0';
 					}
 					/* search for string */
-					iPos=nhexFile->iOff + nhexFile->iyPos*nhexScreen->iChunks*8 + nhexFile->ixPos;
-					iRes=nhexFind(nhexFile, newSearch, &iPos);
+					lPos=nhexFile->iOff + nhexFile->iyPos*nhexScreen->iChunks*8 + nhexFile->ixPos;
+					iRes=nhexFind(nhexFile, newSearch, &lPos);
 					if(iRes == 0)
 						nhexMsg(NHMSGWARN + NHMSGOK, "Not found");
 					else
 					{
-						nhexFile->iOff=(iPos/(nhexScreen->iChunks*8)) * (nhexScreen->iChunks*8);
-						nhexFile->ixPos=iPos-nhexFile->iOff;
+						nhexFile->iOff=(lPos/(nhexScreen->iChunks*8)) * (nhexScreen->iChunks*8);
+						nhexFile->ixPos=lPos-nhexFile->iOff;
 						nhexFile->iyPos=0;
 					}
+				}
+			}
+			break;
+		case 302:
+			/* search - find next */
+			if(nhexFile->fp)
+			{
+				lPos=nhexFile->iOff + nhexFile->iyPos*nhexScreen->iChunks*8 + nhexFile->ixPos;
+				iRes=nhexFind(nhexFile, newSearch, &lPos);
+				if(iRes == 0)
+					nhexMsg(NHMSGWARN + NHMSGOK, "Not found");
+				else
+				{
+					nhexFile->iOff=(lPos/(nhexScreen->iChunks*8)) * (nhexScreen->iChunks*8);
+					nhexFile->ixPos=lPos-nhexFile->iOff;
+					nhexFile->iyPos=0;
 				}
 			}
 			break;

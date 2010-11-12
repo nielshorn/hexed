@@ -27,7 +27,7 @@
 #include "nhexed.h"
 #include "nhexfile.h"
 
-int nhexFind(struct nhexBuff *nhexFile, char *sFind, unsigned int *iPos)
+int nhexFind(struct nhexBuff *nhexFile, char *sFind, long *lPos)
 {
 	unsigned int	i, iRet;
 	int		iLen, iSub;
@@ -36,7 +36,7 @@ int nhexFind(struct nhexBuff *nhexFile, char *sFind, unsigned int *iPos)
 
 	iLen=strlen(sFind);
 
-	for(i=*iPos; i<nhexFile->iFileLength-iLen; i++)
+	for(i=*lPos+1; i<nhexFile->iFileLength-iLen; i++)
 	{
 		bFound=true;
 		for(iSub=0; iSub<iLen; iSub++)
@@ -54,15 +54,15 @@ int nhexFind(struct nhexBuff *nhexFile, char *sFind, unsigned int *iPos)
 	if(bFound)
 	{
 		iRet=1;
-		*iPos=i;
+		*lPos=i;
 	}
 	else
 	{
-		if(*iPos > 0)
+		if(*lPos > 0)
 		{
 			/* search from beginning */
-			*iPos=0;
-			iRet=nhexFind(nhexFile, sFind, iPos);
+			*lPos=-1;
+			iRet=nhexFind(nhexFile, sFind, lPos);
 		}
 		else
 			iRet=0;
