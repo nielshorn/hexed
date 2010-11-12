@@ -18,6 +18,7 @@
 bin_PROGRAMS = nhexed
 nhexed_SOURCES = nhexed.c nhexed.h \
 		 nhexfile.c nhexfile.h \
+		 nhexfind.c nhexfind.h \
 		 nhexforms.c nhexforms.h \
 		 nhexfunc.c nhexfunc.h \
 		 nhexmenu.c nhexmenu.h \

@@ -34,11 +34,11 @@
 #define ARRAY_SIZE(a)	(sizeof(a) / sizeof(a[0]))
 
 char	*nhexMenuItems[]={"001.File",
-				"101.Open",      "102.Save",         "103.Save As...", "104.Exit",
+				"101.Open",      "102.Save",      "103.Save As...", "104.Exit",
 			  "002.Edit",
 				"201.Undo last", "202.Undo All",
 			  "003.Search",
-				/*"301.Find...",   "302.Find Next...",*/ "303.Goto...",
+				"301.Find...",   "302.Find Next", "303.Goto...",
 			  "004.Help",
 				"401.Help",      "402.About",
 			 };

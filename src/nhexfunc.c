@@ -32,15 +32,17 @@
 #include "nhexed.h"
 #include "nhexmsg.h"
 #include "nhexfile.h"
+#include "nhexfind.h"
 #include "nhexforms.h"
 #include "nhexscreen.h"
 
 int nhexFunctions(int function, struct nhexBuff *nhexFile, struct Screen *nhexScreen)
 {
-	int		iRes;
+	int		iRes, i;
 	char		sMsg[MAXMSGLINES * MAXMSGWIDTH];
 	char		newFile[MAXFILENAME]="";
 	char		newPos[11];
+static	char		newSearch[256]="";
 	unsigned int	iPos;
 	char		*p;
 	int		iReturn=0;
@@ -145,6 +147,38 @@ int nhexFunctions(int function, struct nhexBuff *nhexFile, struct Screen *nhexSc
 				sprintf(sMsg, "Really discard %i changes?", nhexFile->iChangeCnt);
 				iRes=nhexMsg(NHMSGWARN + NHMSGNO + NHMSGYES, sMsg);
 				if(iRes == NHMSGYES) nhexFile->iChangeCnt=0;
+			}
+			break;
+		case 301:
+			/* search - find... */
+			if(nhexFile->fp)
+			{
+				iRes=nhexFrmInput("Find...", "Enter string (end with 'h' for hex):", newSearch, 255);
+				if(iRes)
+				{
+					iRes=strlen(newSearch)-1;
+					if(newSearch[iRes] == 'h')
+					{
+						/* transform in 'normal' search string */
+						for(i=0; i<iRes/2; i++)
+						{
+							sscanf(&newSearch[i*2], "%2X", &iPos);
+							newSearch[i]=(char)iPos;
+						}
+						newSearch[i]='\0';
+					}
+					/* search for string */
+					iPos=nhexFile->iOff + nhexFile->iyPos*nhexScreen->iChunks*8 + nhexFile->ixPos;
+					iRes=nhexFind(nhexFile, newSearch, &iPos);
+					if(iRes == 0)
+						nhexMsg(NHMSGWARN + NHMSGOK, "Not found");
+					else
+					{
+						nhexFile->iOff=(iPos/(nhexScreen->iChunks*8)) * (nhexScreen->iChunks*8);
+						nhexFile->ixPos=iPos-nhexFile->iOff;
+						nhexFile->iyPos=0;
+					}
+				}
 			}
 			break;
 		case 303:
