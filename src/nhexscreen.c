@@ -187,7 +187,10 @@ void nhexScreenDetails(struct nhexBuff *nhexFile)
 		move(nhexFile->iyPos + 1,ixCurPos);
 	}
 	else
-		mvprintw(nhexScreen.iRows/2, (nhexScreen.iCols-19)/2, "Open a file to edit");
+	{
+		mvprintw(nhexScreen.iRows/2-1, (nhexScreen.iCols-7)/2, "nHex-Ed");
+		mvprintw(nhexScreen.iRows/2+1, (nhexScreen.iCols-23)/2, "Pess <F12> for the menu");
+	}
 
 	refresh();
 
