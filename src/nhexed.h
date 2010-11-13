@@ -30,6 +30,17 @@
 #define MAXFILENAME	255		/* max length of filename */
 #define MAXCHANGE	1000		/* maximum number of changes allowed */
 
+#define HNKEY_BS	127
+#define HNKEY_DEL	330
+#define HNKEY_END	385
+#define HNKEY_ENTER	10
+#define HNKEY_ERASE	263
+#define HNKEY_ESC	27
+#define HNKEY_INS	331
+#define HNKEY_HOME	362
+#define HNKEY_TAB	9
+#define HNKEY_UNDO	24		/* ^X */
+
 struct	nhexBuff {
 	FILE		*fp;			/* FILE pointer */
 	char		sFileName[MAXFILENAME];	/* complete path+filename */
@@ -43,3 +54,4 @@ struct	nhexBuff {
 	int		iChangeCnt;		/* number of changes entered */
 };
 
+int nhexJumpPos(struct nhexBuff *nhexFile, unsigned int iNewPos);

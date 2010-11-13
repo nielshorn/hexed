@@ -120,37 +120,46 @@ int nhexMvRight(struct nhexBuff *nhexFile)
 /* undo last change */
 int nhexUndoLast(struct nhexBuff *nhexFile)
 {
-	int iTmp;
-	int result=0;			/* 0=nothing, 1=update, 2=redraw */
+	unsigned int	iTmp;
+	int 		result=0;	/* 0=nothing, 1=update, 2=redraw */
 
 	if(nhexFile->iChangeCnt>0)
 	{
 		iTmp=nhexFile->iChangeAddr[nhexFile->iChangeCnt-1];
-		if(iTmp >= nhexFile->iOff && iTmp<=nhexFile->iOff + nhexScreen.iRows*nhexScreen.iChunks*8 - 1)
-		{
-			/* last change is on the screen */
-			nhexScreenDetReset(nhexFile);
-			nhexFile->iyPos=(iTmp - nhexFile->iOff) / (nhexScreen.iChunks*8);
-			nhexFile->ixPos=(iTmp - nhexFile->iOff) % (nhexScreen.iChunks*8);
-			result=1;
-			nhexFile->bHiLo=false;
-		}
-		else
-		{
-			/* need to move the offset, try to center */
-			if(iTmp < (nhexScreen.iRows/2) * (nhexScreen.iChunks*8))
-				nhexFile->iOff=0;
-			else
-				nhexFile->iOff=(iTmp / (nhexScreen.iChunks*8) - (nhexScreen.iRows/2)) * (nhexScreen.iChunks*8);
-			//if(nhexFile.iOff < 0) nhexFile.iOff=0;
-			nhexFile->iyPos=(iTmp - nhexFile->iOff) / (nhexScreen.iChunks*8);
-			nhexFile->ixPos=iTmp % (nhexScreen.iChunks*8);
-			result=2;
-		}
+		result=nhexJumpPos(nhexFile, iTmp);
 		nhexFile->iChangeCnt--;
 	}
 
 	return result;
+}
+
+/* jump to position on screen (from undo, goto, search) */
+int nhexJumpPos(struct nhexBuff *nhexFile, unsigned int iNewPos)
+{
+	int		iRet;		/* 1=update, 2 = redraw */
+
+	if(iNewPos >= nhexFile->iOff && iNewPos<=nhexFile->iOff + nhexScreen.iRows*nhexScreen.iChunks*8 - 1)
+	{
+		/* new position is on the screen */
+		nhexScreenDetReset(nhexFile);
+		nhexFile->iyPos=(iNewPos - nhexFile->iOff) / (nhexScreen.iChunks*8);
+		nhexFile->ixPos=(iNewPos - nhexFile->iOff) % (nhexScreen.iChunks*8);
+		nhexFile->bHiLo=false;
+		iRet=1;
+	}
+	else
+	{
+		/* need to move the offset, try to center */
+		if(iNewPos < (nhexScreen.iRows/2) * (nhexScreen.iChunks*8))
+			nhexFile->iOff=0;
+		else
+			nhexFile->iOff=(iNewPos / (nhexScreen.iChunks*8) - (nhexScreen.iRows/2)) * (nhexScreen.iChunks*8);
+		nhexFile->iyPos=(iNewPos - nhexFile->iOff) / (nhexScreen.iChunks*8);
+		nhexFile->ixPos=iNewPos % (nhexScreen.iChunks*8);
+		iRet=2;
+	}
+
+	return iRet;
 }
 
 /* main entry point */
@@ -237,6 +246,18 @@ int main(int argc, char *argv[])
 			 * TODO: include keys defined in menu
 			 * and call their functions
 			 */
+			case KEY_F(11):
+				/* catch any key */
+				while(1)
+				{
+					c=getch();
+					if(c == KEY_F(11))
+						break;
+					else
+						mvprintw(0, 30, "[%i]", c);
+				}
+				scrRedraw=true;
+				break;
 			case KEY_UP:
 				if(nhexFile.iyPos == 0)
 				{
@@ -324,12 +345,14 @@ int main(int argc, char *argv[])
 				nhexFile.bHiLo=false;
 				break;
 			case KEY_HOME:
+			case HNKEY_HOME:
 				nhexFile.iOff=0;
 				nhexFile.ixPos=0;
 				nhexFile.iyPos=0;
 				scrRedraw=true;
 				break;
 			case KEY_END:
+			case HNKEY_END:
 				nhexFile.iOff=(nhexFile.iFileLength-1) / (nhexScreen.iChunks*8);
 				if(nhexFile.iOff < nhexScreen.iRows+1)
 					nhexFile.iOff=0;
@@ -339,13 +362,13 @@ int main(int argc, char *argv[])
 				nhexFile.ixPos=(nhexFile.iFileLength-1) % (nhexScreen.iChunks*8);
 				scrRedraw=true;
 				break;
-			case 9:
+			case HNKEY_TAB:
 				/* tab - switch between hex & ascii */
 				nhexFile.bPos=!nhexFile.bPos;
 				nhexFile.bHiLo=false;
 				scrUpdate=true;
 				break;
-			case 24:
+			case HNKEY_UNDO:
 				/* ^X - undo last change */
 				iRes=nhexUndoLast(&nhexFile);
 				if(iRes == 1) scrUpdate=true;
@@ -353,7 +376,7 @@ int main(int argc, char *argv[])
 				break;
 			case KEY_F(1):
 			case KEY_F(12):
-			case 27:
+			case HNKEY_ESC:
 				/* we accept F1 / F12 / Esc for menu */
 				iRes=nhexMenu();
 				if(iRes == 201)
@@ -364,11 +387,6 @@ int main(int argc, char *argv[])
 					ready=true;
 				else
 					scrRedraw=true;
-				break;
-			case KEY_CANCEL:
-				iRes=nhexFunctions(104, &nhexFile, &nhexScreen);
-				if(iRes == -1)
-					ready=true;
 				break;
 			default:
 				/* 'normal' character */

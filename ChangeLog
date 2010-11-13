@@ -2,12 +2,13 @@
 
  * 2.00.02:	Second alpha release.
 		- File-Save As / File-Open implemented
+		- Search-Find-Find Next-Goto implemented
 		- Several cosmetic changes
 		- Several small bugfixes
 		- Shortcuts in message functions
 		- msg to stdout/stderr if window not initialized
 		- Show '+' before changed file
-		- command line option -v, start w/o file
+		- command line options -v, -h, start w/o file
 
 2010-11-07  Niels Horn <niels.horn@gmail.com>
 

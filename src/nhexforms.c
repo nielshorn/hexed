@@ -25,6 +25,8 @@
 #include <ncurses.h>
 #include <form.h>
 
+#include "nhexed.h"
+
 /* simple trim function... */
 void nhexFrmTrim(char *sIn)
 {
@@ -97,16 +99,16 @@ int nhexFrmInput(char *pTitle, char *pQuestion, char *pAnswer, int length)
 		switch(ch)
 		{
 			case KEY_ENTER:
-			case 10:
+			case HNKEY_ENTER:
 				form_driver(fileForm, REQ_NEXT_FIELD);
 				iRet=1;
 				ready=true;
 				break;
-			case 27:
+			case HNKEY_ESC:
 				ready=true;
 				break;
-			case 127:
-			case 263:
+			case HNKEY_BS:
+			case HNKEY_ERASE:
 				/* two common "back-space" keys */
 				form_driver(fileForm, REQ_DEL_PREV);
 				break;

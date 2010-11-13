@@ -175,9 +175,7 @@ static	char		newSearch[256]="";
 						nhexMsg(NHMSGWARN + NHMSGOK, "Not found");
 					else
 					{
-						nhexFile->iOff=(lPos/(nhexScreen->iChunks*8)) * (nhexScreen->iChunks*8);
-						nhexFile->ixPos=lPos-nhexFile->iOff;
-						nhexFile->iyPos=0;
+						nhexJumpPos(nhexFile, lPos);
 					}
 				}
 			}
@@ -192,9 +190,7 @@ static	char		newSearch[256]="";
 					nhexMsg(NHMSGWARN + NHMSGOK, "Not found");
 				else
 				{
-					nhexFile->iOff=(lPos/(nhexScreen->iChunks*8)) * (nhexScreen->iChunks*8);
-					nhexFile->ixPos=lPos-nhexFile->iOff;
-					nhexFile->iyPos=0;
+					nhexJumpPos(nhexFile, lPos);
 				}
 			}
 			break;
@@ -216,9 +212,7 @@ static	char		newSearch[256]="";
 						iRes=sscanf(newPos, "%i", &iPos);
 					if(iPos < nhexFile->iFileLength)
 					{
-						nhexFile->iOff=(iPos/(nhexScreen->iChunks*8)) * (nhexScreen->iChunks*8);
-						nhexFile->ixPos=iPos-nhexFile->iOff;
-						nhexFile->iyPos=0;
+						nhexJumpPos(nhexFile, iPos);
 					}
 					else
 					{

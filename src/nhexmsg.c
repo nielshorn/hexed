@@ -187,10 +187,12 @@ int nhexMsg(int flags, char *msg)
 				mvwchgat(msgWin, height-2, 2, width-4, A_REVERSE, 0, NULL);
 				break;
 			case KEY_HOME:
+			case HNKEY_HOME:
 				iButSel=0;
 				mvwchgat(msgWin, height-2, 2, width-4, A_REVERSE, 0, NULL);
 				break;
 			case KEY_END:
+			case HNKEY_END:
 				iButSel=nButton-1;
 				mvwchgat(msgWin, height-2, 2, width-4, A_REVERSE, 0, NULL);
 				break;
@@ -200,13 +202,13 @@ int nhexMsg(int flags, char *msg)
 			case KEY_DOWN:
 				/* scroll down */
 				break;
-			case 27:
+			case HNKEY_ESC:
 				/* escape should always go to <cancel> if included */
 				p=strchr(sButIndex,'c');
 				if(p) ready=true;
 				break;
 			case KEY_ENTER:
-			case 10:
+			case HNKEY_ENTER:
 				iResult=iButVal[iButSel];
 				ready=true;
 				break;
