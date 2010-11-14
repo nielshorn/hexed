@@ -36,6 +36,30 @@
 struct	nhexBuff	nhexFile;
 struct 	Screen		nhexScreen;
 
+/* menu structure
+ * hierarchy,name,shortcut,functioncode,direct key
+ * TODO: checkbox / enabled-disabled
+ */
+struct nhMenuItem nhexMenuItems[]={
+	{  1,"File"      ,'F'},
+	{101,"Open..."   ,'O',"FileOpen"      ,"^O"},
+	{102,"Save"      ,'S',"FileSave"},
+	{103,"Save As...",'A',"FileSaveAs"},
+	{104,"-"},
+	{105,"Exit"      ,'X',"FileExit"      ,"^E"},
+	{  2,"Edit"      ,'E'},
+	{201,"Undo last" ,'U',"EditUndoLast"  ,"^X"},
+	{202,"Undo All"  ,'A',"EditUndoAll"},
+	{  3,"Search"    ,'S'},
+	{301,"Find..."   ,'F',"SearchFind"    ,"^F"},
+	{302,"Find Next" ,'N',"SearchFindNext","F3"},
+	{303,"-"},
+	{304,"Goto..."   ,'G',"SearchGoto"    ,"^G"},
+	{  4,"Help"      ,'H'},
+	{401,"Help"      ,'H',"HelpHelp"      ,"F1"},
+	{402,"About"     ,'A',"HelpAbout"},
+};
+
 /* Check for minimal window size etc. */
 int nhexSanityCheck(void)
 {
@@ -165,14 +189,16 @@ int nhexJumpPos(struct nhexBuff *nhexFile, unsigned int iNewPos)
 /* main entry point */
 int main(int argc, char *argv[])
 {
-	int		opt;
+	int		i, opt;
+	char		*p;
 	struct nhexBuff	nhexFile;
 	int 		c;
 	bool 		ready, scrUpdate, scrRedraw;
-	int		iRes;		/* temp result of functions etc. */
-	//unsigned int	iTmp;		/* temp address for moves etc. */
-	unsigned char	cTmp;		/* temp char for editing etc. */
+	int		iRes;					/* temp result of functions etc. */
+	unsigned char	cTmp;					/* temp char for editing etc. */
 	char		style;
+	int		sMenuKeys[MAXMENUCATS * MAXMENUITEMS];
+	int		nMenuKeys;
 
 	/* verifiy and process command-line options */
 	while((opt=getopt(argc, argv, "hv")) != -1)
@@ -235,6 +261,25 @@ int main(int argc, char *argv[])
 	cbreak();
 	keypad(stdscr, true);
 	ready=false;
+
+	/* mount string with menu codes */
+	/* TODO: move within while-loop if menu become dynamic */
+	nMenuKeys=sizeof(nhexMenuItems)/sizeof(nhexMenuItems[0]);
+	for(i=0; i<nMenuKeys; i++)
+	{
+		sMenuKeys[i]=0;
+		p=nhexMenuItems[i].sKeyCode;
+		if(p[0] == '^')
+			sMenuKeys[i]=p[1]-64;
+		else if(p[0] == 'F')
+		{
+			if(p[2] == '\0')
+				sMenuKeys[i]=KEY_F(p[1]-48);
+			else
+				sMenuKeys[i]=KEY_F(10+p[2]-48);
+		}
+	}
+
 	while(1)
 	{
 		c=getch();
@@ -242,13 +287,9 @@ int main(int argc, char *argv[])
 		scrRedraw=false;
 		switch(c)
 		{
-			/*
-			 * TODO: include keys defined in menu
-			 * and call their functions
-			 */
 			case KEY_F(11):
 				/* catch any key */
-				while(1)
+				/*while(1)
 				{
 					c=getch();
 					if(c == KEY_F(11))
@@ -256,7 +297,7 @@ int main(int argc, char *argv[])
 					else
 						mvprintw(0, 30, "[%i]", c);
 				}
-				scrRedraw=true;
+				scrRedraw=true;*/
 				break;
 			case KEY_UP:
 				if(nhexFile.iyPos == 0)
@@ -374,21 +415,33 @@ int main(int argc, char *argv[])
 				if(iRes == 1) scrUpdate=true;
 				if(iRes == 2) scrRedraw=true;
 				break;
-			case KEY_F(1):
 			case KEY_F(12):
 			case HNKEY_ESC:
-				/* we accept F1 / F12 / Esc for menu */
-				iRes=nhexMenu();
-				if(iRes == 201)
-					iRes=nhexUndoLast(&nhexFile);
-				else if(iRes != 0)
-					iRes=nhexFunctions(iRes, &nhexFile, &nhexScreen);
+				/* we accept F12 & Esc for menu */
+				iRes=nhexMenu(nhexMenuItems, sizeof(nhexMenuItems)/sizeof(nhexMenuItems[0]));
+				if(iRes != 0)
+					iRes=nhexFunctions(nhexMenuItems[iRes].sFunction, &nhexFile, &nhexScreen);
 				if(iRes == -1)
 					ready=true;
 				else
 					scrRedraw=true;
 				break;
 			default:
+				/* check menu keycodes */
+				iRes=-1;
+				for(i=0; i<nMenuKeys; i++)
+				{
+					if(sMenuKeys[i] == c)
+					{
+						iRes=nhexFunctions(nhexMenuItems[i].sFunction, &nhexFile, &nhexScreen);
+						if(iRes == -1)
+							ready=true;
+						else
+							scrRedraw=true;
+						break;
+					}
+				}
+				if(ready || scrRedraw) break;
 				/* 'normal' character */
 				if(!nhexFile.bPos)
 				{

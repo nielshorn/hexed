@@ -46,11 +46,7 @@ WINDOW *msgBoxCreate(int height, int width, int startx, int starty)
 	return msgWin;
 }
 
-void msgBoxDestroy(WINDOW *msgWin)
-{
-	delwin(msgWin);
-}
-
+/* add button */
 void msgButAdd(char *button, int val)
 {
 	iButPos[nButton]=strlen(sButton);
@@ -140,6 +136,7 @@ int nhexMsg(int flags, char *msg)
 	msgPanel[0]=new_panel(stdscr);
 	msgWin=msgBoxCreate(height, width, (pwidth - width)/2, (pheight - height)/2);
 	msgPanel[1]=new_panel(msgWin);
+
 	switch(flags & 32512)		/* bits 14-8 */
 	{
 		case NHMSGINFO:
@@ -209,6 +206,7 @@ int nhexMsg(int flags, char *msg)
 				break;
 			case KEY_ENTER:
 			case HNKEY_ENTER:
+			case HNKEY_SPACE:
 				iResult=iButVal[iButSel];
 				ready=true;
 				break;
@@ -221,12 +219,11 @@ int nhexMsg(int flags, char *msg)
 		if(ready) break;
 	}
 
-	msgBoxDestroy(msgWin);
 	del_panel(msgPanel[1]);
+	delwin(msgWin);
 	del_panel(msgPanel[0]);
 	update_panels();
 	doupdate();
-	refresh();
 
 	return iResult;
 }

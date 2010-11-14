@@ -20,5 +20,20 @@
  *
  */
 
-int nhexMenu();
-int nhexSubMenu(int submenu);
+#define MAXMENUITEMS		30
+#define MAXMENUITEMLENGTH	20
+#define MAXMENUCATS		9
+
+struct nhMenuItem {
+	int	iRef;				/* internal reference */
+	char	sItem[MAXMENUITEMLENGTH+1];	/* Text in menu */
+	char	cShortCut;			/* 1-char shortcut in menu */
+	char	sFunction[MAXMENUITEMLENGTH+1];	/* Name of function to call */
+	char	sKeyCode[3+1];			/* direct key-code (like "F12" or "^Q" etc */
+	bool	bEnabled;			/* flag enabled in menu true/false */
+	bool	bChecked;			/* flag for checkbox items */
+	int	iType;				/* type of menu item (unused for now) */
+};
+
+int nhexMenu(struct nhMenuItem nhexMenuItems[], int iCnt);
+int nhexSubMenu(struct nhMenuItem nhexMenuItems[], int iCnt, int submenu);

@@ -36,7 +36,7 @@
 #include "nhexforms.h"
 #include "nhexscreen.h"
 
-int nhexFunctions(int function, struct nhexBuff *nhexFile, struct Screen *nhexScreen)
+int nhexFunctions(char *sFunction, struct nhexBuff *nhexFile, struct Screen *nhexScreen)
 {
 	int		iRes, i;
 	char		sMsg[MAXMSGLINES * MAXMSGWIDTH];
@@ -49,141 +49,124 @@ static	char		newSearch[256]="";
 	int		iReturn=0;
 	bool		exit=false;
 
-	switch(function)
+	if(!strcmp(sFunction,"FileOpen"))
 	{
-		case 101:
-			/* file - open */
-			if(nhexFile->iChangeCnt > 0)
+		if(nhexFile->iChangeCnt > 0)
+		{
+			sprintf(sMsg, "File has %i changes. Save current file first?", nhexFile->iChangeCnt);
+			iRes=nhexMsg(NHMSGWARN + NHMSGCANCEL + NHMSGNO + NHMSGYES, sMsg);
+			switch(iRes)
 			{
-				sprintf(sMsg, "File has %i changes. Save current file first?", nhexFile->iChangeCnt);
-				iRes=nhexMsg(NHMSGWARN + NHMSGCANCEL + NHMSGNO + NHMSGYES, sMsg);
-				switch(iRes)
-				{
-					case NHMSGCANCEL:
-						/* do nothing, just return */
-						break;
-					case NHMSGYES:
-						/* save file */
-						iRes=nhexFileSave(nhexFile, "");
-						if(iRes != 0) break;
-					case NHMSGNO:
-						exit=true;
-						break;
-				}
+				case NHMSGCANCEL:
+					/* do nothing, just return */
+					break;
+				case NHMSGYES:
+					/* save file */
+					iRes=nhexFileSave(nhexFile, "");
+					if(iRes != 0) break;
+				case NHMSGNO:
+					exit=true;
+					break;
 			}
+		}
+		else
+			exit=true;
+		if(exit)
+		{
+			if(nhexFile->fp)
+			{
+				fclose(nhexFile->fp);
+				nhexFileReset(nhexFile);
+				nhexFile->fp=NULL;
+			}
+			iRes=nhexFileGetName(newFile, 0);
+			if(iRes)
+			{
+				strcpy(nhexFile->sFileName,newFile);
+				nhexFile->fp=nhexFileReadOpen(nhexFile->sFileName, &nhexFile->iFileLength);
+			}
+			if(nhexFile->fp == NULL) nhexFile->iFileLength=0;
+			exit=false;
+		}
+	}
+	else if(!strcmp(sFunction, "FileSave"))
+	{
+		if(nhexFile->fp)
+		{
+			iRes=nhexFileSave(nhexFile, "");
+			if(iRes != 0)
+			{
+				nhexMsg(NHMSGERR + NHMSGOK, "Error writing file.");
+			}
+		}
+	}
+	else if(!strcmp(sFunction, "FileSaveAs"))
+	{
+		if(nhexFile->fp)
+		{
+			p=strrchr(nhexFile->sFileName,'/');
+			if(p)
+				p++;
 			else
-				exit=true;
-			if(exit)
+				p=nhexFile->sFileName;
+			strcpy(newFile,p);
+			iRes=nhexFileGetName(newFile, 1);	/* 1=get new name for existing file */
+			if(iRes)
+				iRes=nhexFileSave(nhexFile, newFile);
+		}
+	}
+	else if(!strcmp(sFunction, "FileExit"))
+	{
+		if(nhexFile->iChangeCnt > 0)
+		{
+			/* unsaved changes, ask what to do */
+			sprintf(sMsg, "File has %i changes. Save File?", nhexFile->iChangeCnt);
+			iRes=nhexMsg(NHMSGWARN + NHMSGCANCEL + NHMSGNO + NHMSGYES, sMsg);
+			switch(iRes)
 			{
-				if(nhexFile->fp)
-				{
-					fclose(nhexFile->fp);
-					nhexFileReset(nhexFile);
-					nhexFile->fp=NULL;
-				}
-				iRes=nhexFileGetName(newFile, 0);
-				if(iRes)
-				{
-					strcpy(nhexFile->sFileName,newFile);
-					nhexFile->fp=nhexFileReadOpen(nhexFile->sFileName, &nhexFile->iFileLength);
-				}
-				if(nhexFile->fp == NULL) nhexFile->iFileLength=0;
-				exit=false;
+				case NHMSGCANCEL:
+					/* do nothing, just return */
+					break;
+				case NHMSGYES:
+					/* save file */
+					iRes=nhexFileSave(nhexFile, "");
+					if(iRes != 0) break;
+				case NHMSGNO:
+					exit=true;
+					break;
 			}
-			break;
-		case 102:
-			/* file - save */
-			if(nhexFile->fp)
+		}
+		else
+			exit=true;
+	}
+	else if(!strcmp(sFunction, "EditUndoAll"))
+	{
+		if(nhexFile->iChangeCnt > 0)
+		{
+			sprintf(sMsg, "Really discard %i changes?", nhexFile->iChangeCnt);
+			iRes=nhexMsg(NHMSGWARN + NHMSGNO + NHMSGYES, sMsg);
+			if(iRes == NHMSGYES) nhexFile->iChangeCnt=0;
+		}
+	}
+	else if(!strcmp(sFunction, "SearchFind"))
+	{
+		if(nhexFile->fp)
+		{
+			iRes=nhexFrmInput("Find...", "Enter string (end with 'h' for hex):", newSearch, 255);
+			if(iRes)
 			{
-				iRes=nhexFileSave(nhexFile, "");
-				if(iRes != 0)
+				iRes=strlen(newSearch)-1;
+				if(newSearch[iRes] == 'h')
 				{
-					nhexMsg(NHMSGERR + NHMSGOK, "Error writing file.");
-				}
-			}
-			break;
-		case 103:
-			/* file - save as... */
-			if(nhexFile->fp)
-			{
-				p=strrchr(nhexFile->sFileName,'/');
-				if(p)
-					p++;
-				else
-					p=nhexFile->sFileName;
-				strcpy(newFile,p);
-				iRes=nhexFileGetName(newFile, 1);	/* 1=get new name for existing file */
-				if(iRes)
-					iRes=nhexFileSave(nhexFile, newFile);
-			}
-			break;
-		case 104:
-			/* file - exit */
-			if(nhexFile->iChangeCnt > 0)
-			{
-				/* unsaved changes, ask what to do */
-				sprintf(sMsg, "File has %i changes. Save File?", nhexFile->iChangeCnt);
-				iRes=nhexMsg(NHMSGWARN + NHMSGCANCEL + NHMSGNO + NHMSGYES, sMsg);
-				switch(iRes)
-				{
-					case NHMSGCANCEL:
-						/* do nothing, just return */
-						break;
-					case NHMSGYES:
-						/* save file */
-						iRes=nhexFileSave(nhexFile, "");
-						if(iRes != 0) break;
-					case NHMSGNO:
-						exit=true;
-						break;
-				}
-			}
-			else
-				exit=true;
-			break;
-		case 202:
-			/* edit - undo all */
-			if(nhexFile->iChangeCnt > 0)
-			{
-				sprintf(sMsg, "Really discard %i changes?", nhexFile->iChangeCnt);
-				iRes=nhexMsg(NHMSGWARN + NHMSGNO + NHMSGYES, sMsg);
-				if(iRes == NHMSGYES) nhexFile->iChangeCnt=0;
-			}
-			break;
-		case 301:
-			/* search - find... */
-			if(nhexFile->fp)
-			{
-				iRes=nhexFrmInput("Find...", "Enter string (end with 'h' for hex):", newSearch, 255);
-				if(iRes)
-				{
-					iRes=strlen(newSearch)-1;
-					if(newSearch[iRes] == 'h')
+					/* transform in 'normal' search string */
+					for(i=0; i<iRes/2; i++)
 					{
-						/* transform in 'normal' search string */
-						for(i=0; i<iRes/2; i++)
-						{
-							sscanf(&newSearch[i*2], "%2X", &iPos);
-							newSearch[i]=(char)iPos;
-						}
-						newSearch[i]='\0';
+						sscanf(&newSearch[i*2], "%2X", &iPos);
+						newSearch[i]=(char)iPos;
 					}
-					/* search for string */
-					lPos=nhexFile->iOff + nhexFile->iyPos*nhexScreen->iChunks*8 + nhexFile->ixPos;
-					iRes=nhexFind(nhexFile, newSearch, &lPos);
-					if(iRes == 0)
-						nhexMsg(NHMSGWARN + NHMSGOK, "Not found");
-					else
-					{
-						nhexJumpPos(nhexFile, lPos);
-					}
+					newSearch[i]='\0';
 				}
-			}
-			break;
-		case 302:
-			/* search - find next */
-			if(nhexFile->fp)
-			{
+				/* search for string */
 				lPos=nhexFile->iOff + nhexFile->iyPos*nhexScreen->iChunks*8 + nhexFile->ixPos;
 				iRes=nhexFind(nhexFile, newSearch, &lPos);
 				if(iRes == 0)
@@ -193,53 +176,68 @@ static	char		newSearch[256]="";
 					nhexJumpPos(nhexFile, lPos);
 				}
 			}
-			break;
-		case 303:
-			/* search - goto */
-			if(nhexFile->fp)
+		}
+	}
+	else if(!strcmp(sFunction, "SearchFindNext"))
+	{
+		if(nhexFile->fp)
+		{
+			lPos=nhexFile->iOff + nhexFile->iyPos*nhexScreen->iChunks*8 + nhexFile->ixPos;
+			iRes=nhexFind(nhexFile, newSearch, &lPos);
+			if(iRes == 0)
+				nhexMsg(NHMSGWARN + NHMSGOK, "Not found");
+			else
 			{
-				iPos=nhexFile->iOff + nhexFile->iyPos*nhexScreen->iChunks*8 + nhexFile->ixPos;
-				if(iPos == 0)
-					strcpy(newPos,"");
+				nhexJumpPos(nhexFile, lPos);
+			}
+		}
+	}
+	else if(!strcmp(sFunction, "SearchGoto"))
+	{
+		if(nhexFile->fp)
+		{
+			iPos=nhexFile->iOff + nhexFile->iyPos*nhexScreen->iChunks*8 + nhexFile->ixPos;
+			if(iPos == 0)
+				strcpy(newPos,"");
+			else
+				sprintf(newPos, "%i", iPos);
+			iRes=nhexFrmInput("Goto...", "Address (end with 'h' for hex):", newPos, 10);
+			if(iRes)
+			{
+				if(newPos[strlen(newPos)-1] == 'h')
+					iRes=sscanf(newPos, "%X", &iPos);
 				else
-					sprintf(newPos, "%i", iPos);
-				iRes=nhexFrmInput("Goto...", "Address (end with 'h' for hex):", newPos, 10);
-				if(iRes)
+					iRes=sscanf(newPos, "%i", &iPos);
+				if(iPos < nhexFile->iFileLength)
 				{
-					if(newPos[strlen(newPos)-1] == 'h')
-						iRes=sscanf(newPos, "%X", &iPos);
-					else
-						iRes=sscanf(newPos, "%i", &iPos);
-					if(iPos < nhexFile->iFileLength)
-					{
-						nhexJumpPos(nhexFile, iPos);
-					}
-					else
-					{
-						nhexMsg(NHMSGERR + NHMSGOK, "Address out of range");
-					}
+					nhexJumpPos(nhexFile, iPos);
+				}
+				else
+				{
+					nhexMsg(NHMSGERR + NHMSGOK, "Address out of range");
 				}
 			}
-			break;
-		case 401:
-			/* help - help */
-			sprintf(sMsg, "Basic Help\n==========\n");
-			sprintf(sMsg, "%sLeft/Right/Up/Down       : Move Left/Right/Up/Down\n", sMsg);
-			sprintf(sMsg, "%sShift-Left / Shift-Right : Beginning / End of line\n", sMsg);
-			sprintf(sMsg, "%sPgUp / PgDown            : Move Up/Down one page\n", sMsg);
-			sprintf(sMsg, "%sHome/End                 : Beginning / End of file\n", sMsg);
-			sprintf(sMsg, "%sTab                      : Alternate between Hex/ASCII\n", sMsg);
-			sprintf(sMsg, "%s^X                       : Undo last change\n", sMsg);
-			sprintf(sMsg, "%sEsc / F1 / F12           : Goto Menu (Esc to leave)\n", sMsg);
-			nhexMsg(NHMSGML + NHMSGINFO + NHMSGOK, sMsg);
-			break;
-		case 402:
-			/* help - about */
-			sprintf(sMsg, "%s %s\nOpen Source Hex Editor\n \n", PACKAGE, VERSION);
-			sprintf(sMsg, "%sby Niels Horn\nniels.horn@gmail.com",sMsg);
-			nhexMsg(NHMSGML + NHMSGINFO + NHMSGOK, sMsg);
-			break;
+		}
 	}
+	else if(!strcmp(sFunction, "HelpHelp"))
+	{
+		sprintf(sMsg, "Basic Help\n==========\n");
+		sprintf(sMsg, "%sLeft/Right/Up/Down       : Move Left/Right/Up/Down\n", sMsg);
+		sprintf(sMsg, "%sShift-Left / Shift-Right : Beginning / End of line\n", sMsg);
+		sprintf(sMsg, "%sPgUp / PgDown            : Move Up/Down one page\n", sMsg);
+		sprintf(sMsg, "%sHome/End                 : Beginning / End of file\n", sMsg);
+		sprintf(sMsg, "%sTab                      : Alternate between Hex/ASCII\n", sMsg);
+		sprintf(sMsg, "%s^X                       : Undo last change\n", sMsg);
+		sprintf(sMsg, "%sEsc / F1 / F12           : Goto Menu (Esc to leave)\n", sMsg);
+		nhexMsg(NHMSGML + NHMSGINFO + NHMSGOK, sMsg);
+	}
+	else if(!strcmp(sFunction, "HelpAbout"))
+	{
+		sprintf(sMsg, "%s %s\nOpen Source Hex Editor\n \n", PACKAGE, VERSION);
+		sprintf(sMsg, "%sby Niels Horn\nniels.horn@gmail.com",sMsg);
+		nhexMsg(NHMSGML + NHMSGINFO + NHMSGOK, sMsg);
+	}
+
 	if(exit) iReturn=-1;
 	return iReturn;
 }
