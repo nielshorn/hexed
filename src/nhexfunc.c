@@ -139,6 +139,11 @@ static	char		newSearch[256]="";
 		else
 			exit=true;
 	}
+	else if(!strcmp(sFunction, "EditUndoLast"))
+	{
+		if(nhexFile->iChangeCnt > 0)
+			iRes=nhexUndoLast(nhexFile);
+	}
 	else if(!strcmp(sFunction, "EditUndoAll"))
 	{
 		if(nhexFile->iChangeCnt > 0)

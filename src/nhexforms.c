@@ -129,6 +129,7 @@ int nhexFrmInput(char *pTitle, char *pQuestion, char *pAnswer, int length)
 	if(iRet)
 	{
 		strncpy(pAnswer, field_buffer(field[1], 0), length);
+		pAnswer[length]='\0';
 		nhexFrmTrim(pAnswer);
 	}
 

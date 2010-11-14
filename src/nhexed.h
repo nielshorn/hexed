@@ -56,3 +56,4 @@ struct	nhexBuff {
 };
 
 int nhexJumpPos(struct nhexBuff *nhexFile, unsigned int iNewPos);
+int nhexUndoLast(struct nhexBuff *nhexFile);

@@ -409,12 +409,6 @@ int main(int argc, char *argv[])
 				nhexFile.bHiLo=false;
 				scrUpdate=true;
 				break;
-			case HNKEY_UNDO:
-				/* ^X - undo last change */
-				iRes=nhexUndoLast(&nhexFile);
-				if(iRes == 1) scrUpdate=true;
-				if(iRes == 2) scrRedraw=true;
-				break;
 			case KEY_F(12):
 			case HNKEY_ESC:
 				/* we accept F12 & Esc for menu */
@@ -441,7 +435,7 @@ int main(int argc, char *argv[])
 						break;
 					}
 				}
-				if(ready || scrRedraw) break;
+				if(ready || scrRedraw || nhexFile.fp==NULL) break;
 				/* 'normal' character */
 				if(!nhexFile.bPos)
 				{
@@ -470,9 +464,12 @@ int main(int argc, char *argv[])
 							break;
 						}
 						/* calculate address & change high bits */
-						nhexFile.iChangeAddr[nhexFile.iChangeCnt]=nhexFile.iOff + nhexFile.iyPos * nhexScreen.iChunks*8 + nhexFile.ixPos;
-						nhexFile.cChangeByte[nhexFile.iChangeCnt]=(nhexFileReadPos(&nhexFile, \
-									nhexFile.iChangeAddr[nhexFile.iChangeCnt], &style) & 15) + cTmp;
+						nhexFile.iChangeAddr[nhexFile.iChangeCnt]= \
+							nhexFile.iOff + nhexFile.iyPos * nhexScreen.iChunks*8 + \
+							nhexFile.ixPos;
+						nhexFile.cChangeByte[nhexFile.iChangeCnt]= \
+							(nhexFileReadPos(&nhexFile, \
+							nhexFile.iChangeAddr[nhexFile.iChangeCnt], &style) & 15) + cTmp;
 						nhexFile.iChangeCnt++;
 						nhexFile.bHiLo=true;
 						scrUpdate=true;
@@ -480,7 +477,8 @@ int main(int argc, char *argv[])
 					else
 					{
 						/* change low bits of last change */
-						nhexFile.cChangeByte[nhexFile.iChangeCnt-1]=(nhexFile.cChangeByte[nhexFile.iChangeCnt-1] & 240) + cTmp;
+						nhexFile.cChangeByte[nhexFile.iChangeCnt-1]= \
+							(nhexFile.cChangeByte[nhexFile.iChangeCnt-1] & 240) + cTmp;
 						nhexFile.bHiLo=false;
 						scrUpdate=true;
 						iRes=nhexMvRight(&nhexFile);
@@ -498,7 +496,9 @@ int main(int argc, char *argv[])
 							scrRedraw=true;
 							break;
 						}
-						nhexFile.iChangeAddr[nhexFile.iChangeCnt]=nhexFile.iOff + nhexFile.iyPos * nhexScreen.iChunks*8 + nhexFile.ixPos;
+						nhexFile.iChangeAddr[nhexFile.iChangeCnt]= \
+							nhexFile.iOff + nhexFile.iyPos * nhexScreen.iChunks*8 + \
+							nhexFile.ixPos;
 						nhexFile.cChangeByte[nhexFile.iChangeCnt]=c;
 						nhexFile.iChangeCnt++;
 						scrUpdate=true;

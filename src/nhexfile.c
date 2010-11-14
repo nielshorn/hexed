@@ -56,13 +56,14 @@ FILE* nhexFileReadOpen(char *pFileName, unsigned int *iFileLength)
 	}
 	
 	fseek(fp, 0, SEEK_END);
-	*iFileLength = ftell(fp);
 
-	if(*iFileLength > MAXLENGTH)
+	if(ftell(fp) > MAXLENGTH)
 	{
 		nhexMsg(NHMSGERR + NHMSGOK, "File too large");
-		return NULL;		/* file too large */
+		return NULL;
 	}
+
+	*iFileLength = ftell(fp);
 
 	return fp;
 }
