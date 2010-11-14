@@ -31,12 +31,12 @@ int nhexFind(struct nhexBuff *nhexFile, char *sFind, long *lPos)
 {
 	unsigned int	i, iRet;
 	int		iLen, iSub;
-	bool		bFound;
+	bool		bFound=false;
 	char		c, style;
 
 	iLen=strlen(sFind);
 
-	for(i=*lPos+1; i<nhexFile->iFileLength-iLen; i++)
+	for(i=*lPos+1; i<nhexFile->iFileLength-iLen+1; i++)
 	{
 		bFound=true;
 		for(iSub=0; iSub<iLen; iSub++)
@@ -65,7 +65,9 @@ int nhexFind(struct nhexBuff *nhexFile, char *sFind, long *lPos)
 			iRet=nhexFind(nhexFile, sFind, lPos);
 		}
 		else
+		{
 			iRet=0;
+		}
 	}
 
 	return iRet;
