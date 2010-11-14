@@ -84,7 +84,7 @@ int nhexFrmInput(char *pTitle, char *pQuestion, char *pAnswer, int length)
 	keypad(fileWin, TRUE);
 	set_form_win(fileForm, fileWin);
 	set_form_sub(fileForm, derwin(fileWin, iyForm, ixForm, 2, 2));
-	box(fileWin, 0, 0);
+	wborder(fileWin, '|', '|', '-', '-', '+', '+', '+', '+');
 	mvwprintw(fileWin, 0, 2, pTitle);
 	post_form(fileForm);
 	wrefresh(fileWin);

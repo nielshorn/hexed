@@ -35,6 +35,7 @@ int nhexFind(struct nhexBuff *nhexFile, char *sFind, long *lPos)
 	char		c, style;
 
 	iLen=strlen(sFind);
+	if(iLen == 0) return 1;
 
 	for(i=*lPos+1; i<nhexFile->iFileLength-iLen+1; i++)
 	{
