@@ -1,3 +1,14 @@
+2010-xx-xx  Niels Horn <niels.horn@gmail.com>
+
+ * 2.00.03:	Third alpha release.
+		- Rewritten menu structure
+		- BUGFIX: inverted del_panel/delwin (caused segfaults in rare
+		occasions)
+		- BUGFIX: goto hex address was not always working (corrected
+		length calculation in form)
+		- BUGFIX: searching bytes near end of file did not work
+		- BUGFIX: messed up last columns in Xfce Terminal
+
 2010-11-13  Niels Horn <niels.horn@gmail.com>
 
  * 2.00.02:	Second alpha release.

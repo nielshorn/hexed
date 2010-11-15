@@ -184,7 +184,7 @@ void nhexScreenDetails(struct nhexBuff *nhexFile)
 	/* show edit-position & set cursor */
 	if(nhexFile->fp){
 		nhexScreenShowByte(nhexFile, iPos, nhexFile->iyPos, ixHexPos, ixAscPos);
-		move(nhexFile->iyPos + 1,ixCurPos);
+		move(nhexFile->iyPos + 1, ixCurPos);
 	}
 	else
 	{

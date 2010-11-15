@@ -190,6 +190,7 @@ int nhexJumpPos(struct nhexBuff *nhexFile, unsigned int iNewPos)
 int main(int argc, char *argv[])
 {
 	int		i, opt;
+	int		x, y;
 	char		*p;
 	struct nhexBuff	nhexFile;
 	int 		c;
@@ -282,6 +283,17 @@ int main(int argc, char *argv[])
 
 	while(1)
 	{
+		/*
+		 * This is a workaround for a bug that only affects Xfce Terminal
+		 * We need to "reset" the screen, printing something at 0,0,
+		 * so let's call the ScreenHeader routine.
+		 * (without this, <tab> messes up some columns in Terminal)
+		 */
+		getyx(stdscr,y,x);
+		nhexScreenHeader();
+		move(y,x);
+
+		/* catch a key and process it */
 		c=getch();
 		scrUpdate=false;
 		scrRedraw=false;
