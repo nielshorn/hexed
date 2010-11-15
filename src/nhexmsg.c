@@ -118,7 +118,6 @@ int nhexMsg(int flags, char *msg)
 	}
 
 	/* check needed width */
-
 	if(strlen(msg) > strlen(sButton)+1)
 	{
 		width=mwidth+4;

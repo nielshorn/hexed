@@ -2,6 +2,7 @@
 
  * 2.00.03:	Third alpha release.
 		- Rewritten menu structure
+		- Improvements in forms routines (home/end/ins/del keys)
 		- BUGFIX: inverted del_panel/delwin (caused segfaults in rare
 		occasions)
 		- BUGFIX: goto hex address was not always working (corrected

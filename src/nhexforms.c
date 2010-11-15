@@ -24,6 +24,7 @@
 
 #include <ncurses.h>
 #include <form.h>
+#include <panel.h>
 
 #include "nhexed.h"
 
@@ -40,8 +41,9 @@ void nhexFrmTrim(char *sIn)
 int nhexFrmInput(char *pTitle, char *pQuestion, char *pAnswer, int length)
 {
 	FIELD	*field[3];		/* question + answer + NULL-pointer */
-	FORM	*fileForm;
-	WINDOW	*fileWin;
+	FORM	*frmForm;
+	WINDOW	*frmWin, *frmSubWin;
+	PANEL	*frmPanel[2];
 	int	ixForm, iyForm;
 	int	pheight, pwidth;
 	int	ch;
@@ -68,39 +70,48 @@ int nhexFrmInput(char *pTitle, char *pQuestion, char *pAnswer, int length)
 	 * a separate routine
 	 */
 
-	/* set up form */
+	/* set up label & input field */
 	field[0]=new_field(1, strlen(pQuestion), 0, 0, 0, 0);
 	field[1]=new_field(1, maxWidth, 1, 0, 0, 0);
 	field[2]=NULL;
 	set_field_buffer(field[0], 0, pQuestion);
+	set_field_back(field[0], A_BOLD);
 	field_opts_off(field[0], O_ACTIVE);
 	set_field_buffer(field[1], 0, pAnswer);
-	set_field_back(field[1], A_REVERSE);
+	set_field_back(field[1], A_UNDERLINE);
 	field_opts_off(field[1], O_AUTOSKIP + fOption);
 
-	fileForm=new_form(field);
-	scale_form(fileForm, &iyForm, &ixForm);
-	fileWin=newwin(iyForm+4, ixForm+4, (pheight-iyForm-4)/2, (pwidth-ixForm-4)/2);
-	keypad(fileWin, TRUE);
-	set_form_win(fileForm, fileWin);
-	set_form_sub(fileForm, derwin(fileWin, iyForm, ixForm, 2, 2));
-	wborder(fileWin, '|', '|', '-', '-', '+', '+', '+', '+');
-	mvwprintw(fileWin, 0, 2, pTitle);
-	post_form(fileForm);
-	wrefresh(fileWin);
-	wmove(fileWin, 3, 2);
-	form_driver(fileForm, REQ_END_FIELD);
-	refresh();
+	/* set up form */
+	frmPanel[0]=new_panel(stdscr);
+	frmForm=new_form(field);
+	scale_form(frmForm, &iyForm, &ixForm);
+	frmWin=newwin(iyForm+4, ixForm+4, (pheight-iyForm-4)/2, (pwidth-ixForm-4)/2);
+	wattron(frmWin, A_REVERSE);
+	wborder(frmWin, '|', '|', '-', '-', '+', '+', '+', '+');
+	set_form_win(frmForm, frmWin);
+	frmSubWin=derwin(frmWin, iyForm, ixForm, 2, 2);
+	set_form_sub(frmForm, frmSubWin);
+	frmPanel[1]=new_panel(frmWin);
 
+	mvwprintw(frmWin, 0, 2, pTitle);
+	post_form(frmForm);
+	wrefresh(frmWin);
+	wmove(frmWin, 3, 2);
+	form_driver(frmForm, REQ_BEG_FIELD);
+	update_panels();
+	doupdate();
+
+	/* handle input */
+	keypad(frmWin, TRUE);
 	ready=false;
 	while(1)
 	{
-		ch=wgetch(fileWin);
+		ch=wgetch(frmWin);
 		switch(ch)
 		{
 			case KEY_ENTER:
 			case HNKEY_ENTER:
-				form_driver(fileForm, REQ_NEXT_FIELD);
+				form_driver(frmForm, REQ_NEXT_FIELD);
 				iRet=1;
 				ready=true;
 				break;
@@ -110,17 +121,29 @@ int nhexFrmInput(char *pTitle, char *pQuestion, char *pAnswer, int length)
 			case HNKEY_BS:
 			case HNKEY_ERASE:
 				/* two common "back-space" keys */
-				form_driver(fileForm, REQ_DEL_PREV);
+				form_driver(frmForm, REQ_DEL_PREV);
+				break;
+			case HNKEY_DEL:
+				form_driver(frmForm, REQ_DEL_CHAR);
+				break;
+			case HNKEY_INS:
+				form_driver(frmForm, REQ_INS_CHAR);
 				break;
 			case KEY_LEFT:
-				form_driver(fileForm, REQ_PREV_CHAR);
+				form_driver(frmForm, REQ_PREV_CHAR);
 				break;
 			case KEY_RIGHT:
-				form_driver(fileForm, REQ_NEXT_CHAR);
+				form_driver(frmForm, REQ_NEXT_CHAR);
+				break;
+			case KEY_HOME:
+				form_driver(frmForm, REQ_BEG_FIELD);
+				break;
+			case KEY_END:
+				form_driver(frmForm, REQ_END_FIELD);
 				break;
 			default:
 				if(ch >= 32 && ch < 127)
-					form_driver(fileForm, ch);
+					form_driver(frmForm, ch);
 				break;
 		}
 		if(ready) break;
@@ -133,11 +156,15 @@ int nhexFrmInput(char *pTitle, char *pQuestion, char *pAnswer, int length)
 		nhexFrmTrim(pAnswer);
 	}
 
-	unpost_form(fileForm);
-	free_form(fileForm);
+	unpost_form(frmForm);
+	free_form(frmForm);
 	free_field(field[0]);
-	delwin(fileWin);
-	refresh();
+	free_field(field[1]);
+	del_panel(frmPanel[1]);
+	delwin(frmWin);
+	del_panel(frmPanel[0]);
+	update_panels();
+	doupdate();
 
 	return iRet;
 }
