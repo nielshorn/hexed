@@ -76,7 +76,7 @@ void nhexScreenShow(struct nhexBuff *nhexFile)
 {
 	unsigned int	i=0;
 	int		j=-1;
-	int		k=0, spacer;
+	int		k=0, spacer=0;
 	int		ixHexPos, ixAscPos;
 
 	for(i=nhexFile->iOff; i < nhexFile->iFileLength; i++)

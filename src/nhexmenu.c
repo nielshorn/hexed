@@ -213,7 +213,7 @@ int nhexMenu(struct nhMenuItem nhexMenuItems[], int iCnt)
 /* submenu */
 int nhexSubMenu(struct nhMenuItem nhexMenuItems[], int iCnt, int submenu)
 {
-	int	i, j, iCur;
+	int	i, j, iCur=1;
 	int	c;
 	int	iResult;
 	int	iSub, maxSub=0;

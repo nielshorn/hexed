@@ -25,6 +25,15 @@ if test "$NCURS" = "no"; then
 	echo
 	exit
 fi
+AC_CHECK_HEADERS(ncurses.h,,LCURS="no")
+AC_CHECK_HEADERS(form.h,,LCURS="no")
+AC_CHECK_HEADERS(panel.h,,LCURS="no")
+if test "$LCURS" = "no"; then
+	echo
+	echo "** ERROR: One of the ncurses headers (ncurses.h/form.h/panel.h) was not found!"
+	echo
+	exit
+fi
 AM_CONFIG_HEADER(config.h)
 CFLAGS="$CFLAGS -Wall"
 AM_INIT_AUTOMAKE(nhexed,2.00.02)

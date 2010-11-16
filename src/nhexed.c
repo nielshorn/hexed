@@ -190,6 +190,7 @@ int nhexJumpPos(struct nhexBuff *nhexFile, unsigned int iNewPos)
 int main(int argc, char *argv[])
 {
 	int		i, opt;
+	unsigned int	jval=0;
 	int		x, y;
 	char		*p;
 	struct nhexBuff	nhexFile;
@@ -202,7 +203,7 @@ int main(int argc, char *argv[])
 	int		nMenuKeys;
 
 	/* verifiy and process command-line options */
-	while((opt=getopt(argc, argv, "hv")) != -1)
+	while((opt=getopt(argc, argv, "hj:v")) != -1)
 	{
 		switch(opt)
 		{
@@ -210,14 +211,18 @@ int main(int argc, char *argv[])
 				printf("Usage: %s [options] [filename]\n\n", PACKAGE);
 				printf("Options:\n");
 				printf("  -h            Print this help text and exit\n");
+				printf("  -j <address>  Jump to address in file\n");
 				printf("  -v            Print the version number and exit\n");
 				printf("\nReport bugs to <niels.horn@gmail.com>\n");
 				exit(0);
+			case 'j':
+				jval=atoi(optarg);
+				break;
 			case 'v':
 				printf("%s - Version %s\n", PACKAGE, VERSION);
 				exit(0);
 			default:
-				fprintf(stderr, "** Usage: %s [-hv] | [filename]\n", argv[0]);
+				fprintf(stderr, "** Usage: %s [-hv] | [-j] [filename]\n", argv[0]);
 				exit(1);
 		}
 	}
@@ -249,11 +254,22 @@ int main(int argc, char *argv[])
 		nhexFile.iFileLength=0;
 	}
 
+	if(jval && jval>=nhexFile.iFileLength)
+	{
+		fprintf(stderr, "** Address larger than filelength\n");
+		exit(1);
+	}
+
 	/* check if we have a capable terminal */
 	if(nhexSanityCheck())
 		exit(1);
 	
 	nhexScreenSetup(&nhexScreen);
+	if(jval)
+	{
+		/* goto initial position in file */
+		iRes=nhexJumpPos(&nhexFile, jval);
+	}
 	nhexScreenShow(&nhexFile);
 	nhexScreenDetails(&nhexFile);
 

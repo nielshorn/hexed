@@ -1,8 +1,11 @@
 2010-xx-xx  Niels Horn <niels.horn@gmail.com>
 
  * 2.00.03:	Third alpha release.
-		- Rewritten menu structure
+		- Rewritten menu routines, w/ shortcuts and direct-access
+		key-codes
 		- Improvements in forms routines (home/end/ins/del keys)
+		- Added -j startup option
+		- Check for ncurses in configure.in
 		- BUGFIX: inverted del_panel/delwin (caused segfaults in rare
 		occasions)
 		- BUGFIX: goto hex address was not always working (corrected
