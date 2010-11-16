@@ -16,6 +16,15 @@
 # Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #
 AC_INIT
+AC_CHECK_LIB(ncurses,initscr,,NCURS="no")
+AC_CHECK_LIB(form,new_form,,NCURS="no")
+AC_CHECK_LIB(panel,new_panel,,NCURS="no")
+if test "$NCURS" = "no"; then
+	echo
+	echo " ** ERROR: One of the ncurses libraries (ncurses/form/panel) was not found!"
+	echo
+	exit
+fi
 AM_CONFIG_HEADER(config.h)
 CFLAGS="$CFLAGS -Wall"
 AM_INIT_AUTOMAKE(nhexed,2.00.02)
