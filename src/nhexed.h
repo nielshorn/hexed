@@ -39,6 +39,7 @@
 #define HNKEY_INS	331
 #define HNKEY_HOME	362
 #define HNKEY_SPACE	32
+#define HNKEY_STAB	353
 #define HNKEY_TAB	9
 #define HNKEY_UNDO	24		/* ^X */
 

@@ -21,29 +21,46 @@
  */
 
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 #include <stdbool.h>
 
 #include "nhexed.h"
 #include "nhexfile.h"
 
-int nhexFind(struct nhexBuff *nhexFile, char *sFind, long *lPos)
+int nhexFind(struct nhexBuff *nhexFile, char *sFind, long *lPos, bool *bHex)
 {
-	unsigned int	i, iRet;
+	unsigned int	i, cTmp, iRet;
 	int		iLen, iSub;
 	bool		bFound=false;
-	char		c, style;
+	char		c, *cFind, style;
 
-	iLen=strlen(sFind);
+	/* find correct length of string */
+	if(*bHex)
+	{
+		iLen=strlen(sFind)/2;
+		cFind=malloc(iLen);
+		for(i=0; i<iLen; i++)
+		{
+			sscanf(&sFind[i*2], "%2X", &cTmp);
+			cFind[i]=(unsigned char)cTmp;
+		}
+	}
+	else
+	{
+		iLen=strlen(sFind);
+		cFind=sFind;
+	}
 	if(iLen == 0) return 1;
 
+	/* start search */
 	for(i=*lPos+1; i<nhexFile->iFileLength-iLen+1; i++)
 	{
 		bFound=true;
 		for(iSub=0; iSub<iLen; iSub++)
 		{
 			c=nhexFileReadPos(nhexFile, i+iSub, &style);
-			if(c != sFind[iSub])
+			if(c != cFind[iSub])
 			{
 				bFound=false;
 				break;
@@ -63,7 +80,7 @@ int nhexFind(struct nhexBuff *nhexFile, char *sFind, long *lPos)
 		{
 			/* search from beginning */
 			*lPos=-1;
-			iRet=nhexFind(nhexFile, sFind, lPos);
+			iRet=nhexFind(nhexFile, sFind, lPos, bHex);
 		}
 		else
 		{
@@ -71,5 +88,6 @@ int nhexFind(struct nhexBuff *nhexFile, char *sFind, long *lPos)
 		}
 	}
 
+	if(*bHex) free(cFind);
 	return iRet;
 }

@@ -20,4 +20,4 @@
  *
  */
 
-int nhexFrmInput(char *pTitle, char *pQuestion, char *pAnswer, int length);
+int nhexFrmInput(char *pTitle, char *pQuestion, char *pAnswer, int length, char cType, bool *bHex);

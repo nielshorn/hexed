@@ -36,9 +36,9 @@ int nhexFileGetName(char *newFile, int flags)
 	int	iRet;
 
 	if(flags == 1)
-		iRet=nhexFrmInput("Save As...", "Enter filename:", newFile, MAXFILENAME-1);
+		iRet=nhexFrmInput("Save As...", "Enter filename:", newFile, MAXFILENAME-1, 't', false);
 	else
-		iRet=nhexFrmInput("Open File...", "Enter filename:", newFile, MAXFILENAME-1);
+		iRet=nhexFrmInput("Open File...", "Enter filename:", newFile, MAXFILENAME-1, 't', false);
 
 	return iRet;
 }

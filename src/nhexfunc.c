@@ -38,7 +38,7 @@
 
 int nhexFunctions(char *sFunction, struct nhexBuff *nhexFile, struct Screen *nhexScreen)
 {
-	int		iRes, i;
+	int		iRes;
 	char		sMsg[MAXMSGLINES * MAXMSGWIDTH];
 	char		newFile[MAXFILENAME]="";
 	char		newPos[11];
@@ -47,6 +47,7 @@ static	char		newSearch[256]="";
 	long		lPos;
 	char		*p;
 	int		iReturn=0;
+static	bool		bFindHex=true, bGotoHex=true;
 	bool		exit=false;
 
 	if(!strcmp(sFunction,"FileOpen"))
@@ -157,23 +158,13 @@ static	char		newSearch[256]="";
 	{
 		if(nhexFile->fp)
 		{
-			iRes=nhexFrmInput("Find...", "Enter string (end with 'h' for hex):", newSearch, 255);
+			iRes=nhexFrmInput("Find...", "Enter string:", newSearch, 255, 's', &bFindHex);
 			if(iRes)
 			{
 				iRes=strlen(newSearch)-1;
-				if(newSearch[iRes] == 'h')
-				{
-					/* transform in 'normal' search string */
-					for(i=0; i<iRes/2; i++)
-					{
-						sscanf(&newSearch[i*2], "%2X", &iPos);
-						newSearch[i]=(char)iPos;
-					}
-					newSearch[i]='\0';
-				}
 				/* search for string */
 				lPos=nhexFile->iOff + nhexFile->iyPos*nhexScreen->iChunks*8 + nhexFile->ixPos;
-				iRes=nhexFind(nhexFile, newSearch, &lPos);
+				iRes=nhexFind(nhexFile, newSearch, &lPos, &bFindHex);
 				if(iRes == 0)
 					nhexMsg(NHMSGWARN + NHMSGOK, "Not found");
 				else
@@ -188,7 +179,7 @@ static	char		newSearch[256]="";
 		if(nhexFile->fp)
 		{
 			lPos=nhexFile->iOff + nhexFile->iyPos*nhexScreen->iChunks*8 + nhexFile->ixPos;
-			iRes=nhexFind(nhexFile, newSearch, &lPos);
+			iRes=nhexFind(nhexFile, newSearch, &lPos, &bFindHex);
 			if(iRes == 0)
 				nhexMsg(NHMSGWARN + NHMSGOK, "Not found");
 			else
@@ -205,11 +196,16 @@ static	char		newSearch[256]="";
 			if(iPos == 0)
 				strcpy(newPos,"");
 			else
-				sprintf(newPos, "%i", iPos);
-			iRes=nhexFrmInput("Goto...", "Address (end with 'h' for hex):", newPos, 10);
+			{
+				if(bGotoHex)
+					sprintf(newPos, "%X", iPos);
+				else
+					sprintf(newPos, "%i", iPos);
+			}
+			iRes=nhexFrmInput("Goto...", "Address:", newPos, 10, 'a', &bGotoHex);
 			if(iRes)
 			{
-				if(newPos[strlen(newPos)-1] == 'h')
+				if(bGotoHex)
 					iRes=sscanf(newPos, "%X", &iPos);
 				else
 					iRes=sscanf(newPos, "%i", &iPos);

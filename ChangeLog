@@ -1,10 +1,13 @@
 2010-xx-xx  Niels Horn <niels.horn@gmail.com>
 
  * 2.00.03:	Third alpha release.
-		- Rewritten menu routines, w/ shortcuts and direct-access
+		- Improved menu routines, w/ shortcuts and direct-access
 		key-codes
-		- Improvements in forms routines (home/end/ins/del keys)
-		- Added -j startup option
+		- Improved forms routines (home/end/ins/del/tab keys)
+		- Improved search function (better hex search, remembers
+		hex/ascii setting)
+		- Improved goto function (remembers hex/decimal)
+		- Added -j startup option (address in decimal or hex)
 		- Check for ncurses in configure.in
 		- BUGFIX: inverted del_panel/delwin (caused segfaults in rare
 		occasions)

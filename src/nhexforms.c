@@ -20,6 +20,7 @@
  *
  */
 
+#include <stdlib.h>
 #include <string.h>
 
 #include <ncurses.h>
@@ -37,16 +38,62 @@ void nhexFrmTrim(char *sIn)
 		sIn[i]='\0';
 }
 
-/* single line input form */
-int nhexFrmInput(char *pTitle, char *pQuestion, char *pAnswer, int length)
+/* convert to/from hex */
+void nhexFrmHexConv(bool *bHex, FIELD *field, char cType)
 {
-	FIELD	*field[3];		/* question + answer + NULL-pointer */
+	char		sIn[255], sOut[255]="";
+	int		i, iChar;
+	unsigned int	lAddr;
+
+	strcpy(sIn, field_buffer(field, 0));
+	nhexFrmTrim(sIn);
+
+	switch(cType)
+	{
+		case 's':
+			if(*bHex)
+			{
+				for(i=0; i<strlen(sIn)/2; i++)
+				{
+					sscanf(&sIn[i*2], "%2X", &iChar);
+					if(iChar <32 || iChar>124) iChar='.';
+					sOut[i]=iChar;
+				}
+				sOut[i]='\0';
+			}
+			else
+			{
+				for(i=0; i<strlen(sIn); i++)
+					sprintf(sOut, "%s%02X", sOut, sIn[i]);
+			}
+			break;
+		case 'a':
+			if(*bHex)
+			{
+				sscanf(sIn, "%X", &lAddr);
+				sprintf(sOut, "%u", lAddr);
+			}
+			else
+			{
+				lAddr=atoi(sIn);
+				sprintf(sOut, "%X", lAddr);
+			}
+			break;
+	}
+	set_field_buffer(field, 0, sOut);
+	*bHex=!*bHex;
+}
+
+/* generic input form */
+int nhexFrmInput(char *pTitle, char *pQuestion, char *pAnswer, int length, char cType, bool *bHex)
+{
+	FIELD	*field[7];		/* question + answer + 2-way switch/label + NULL-pointer */
 	FORM	*frmForm;
 	WINDOW	*frmWin, *frmSubWin;
 	PANEL	*frmPanel[2];
 	int	ixForm, iyForm;
 	int	pheight, pwidth;
-	int	ch;
+	int	i, ch;
 	int	iRet=0;
 	bool	ready;
 	int	maxWidth;
@@ -72,14 +119,86 @@ int nhexFrmInput(char *pTitle, char *pQuestion, char *pAnswer, int length)
 
 	/* set up label & input field */
 	field[0]=new_field(1, strlen(pQuestion), 0, 0, 0, 0);
-	field[1]=new_field(1, maxWidth, 1, 0, 0, 0);
-	field[2]=NULL;
 	set_field_buffer(field[0], 0, pQuestion);
 	set_field_back(field[0], A_BOLD);
 	field_opts_off(field[0], O_ACTIVE);
+	field[1]=new_field(1, maxWidth, 1, 0, 0, 0);
 	set_field_buffer(field[1], 0, pAnswer);
 	set_field_back(field[1], A_UNDERLINE);
 	field_opts_off(field[1], O_AUTOSKIP + fOption);
+	switch(cType)
+	{
+		case 't':
+			/* text */
+			field[2]=NULL;
+			break;
+		case 's':
+			/* search: hex / ascii */
+			field[2]=new_field(1, 1, 2, 0, 0, 0);
+			set_field_back(field[2], A_UNDERLINE);
+			field_opts_off(field[2], O_AUTOSKIP);
+			field[3]=new_field(1, 3, 2, 2, 0, 0);
+			set_field_buffer(field[3], 0, "HEX");
+			set_field_back(field[3], A_BOLD);
+			field_opts_off(field[3], O_ACTIVE);
+			field[4]=new_field(1, 1, 2, 6, 0, 0);
+			set_field_back(field[4], A_UNDERLINE);
+			field_opts_off(field[4], O_AUTOSKIP);
+			field[5]=new_field(1, 5, 2, 8, 0, 0);
+			set_field_buffer(field[5], 0, "ASCII");
+			set_field_back(field[5], A_BOLD);
+			field_opts_off(field[5], O_ACTIVE);
+			field[6]=NULL;
+			//if(pAnswer[strlen(pAnswer)-1] == 'h')
+			if(*bHex)
+			{
+				set_field_buffer(field[2], 0, "X");
+				set_field_buffer(field[4], 0, " ");
+				//*bHex=true;
+			}
+			else
+			{
+				set_field_buffer(field[2], 0, " ");
+				set_field_buffer(field[4], 0, "X");
+				//*bHex=false;
+			}
+			break;
+		case 'a':
+			/* address: decimal or hex */
+			field[2]=new_field(1, 1, 2, 0, 0, 0);
+			set_field_back(field[2], A_UNDERLINE);
+			field_opts_off(field[2], O_AUTOSKIP);
+			field[3]=new_field(1, 3, 2, 2, 0, 0);
+			set_field_buffer(field[3], 0, "HEX");
+			set_field_back(field[3], A_BOLD);
+			field_opts_off(field[3], O_ACTIVE);
+			field[4]=new_field(1, 1, 2, 6, 0, 0);
+			set_field_back(field[4], A_UNDERLINE);
+			field_opts_off(field[4], O_AUTOSKIP);
+			field[5]=new_field(1, 7, 2, 8, 0, 0);
+			set_field_buffer(field[5], 0, "DECIMAL");
+			set_field_back(field[5], A_BOLD);
+			field_opts_off(field[5], O_ACTIVE);
+			field[6]=NULL;
+			//if(pAnswer[strlen(pAnswer)-1] == 'h')
+			if(*bHex)
+			{
+				set_field_buffer(field[2], 0, "X");
+				set_field_buffer(field[4], 0, " ");
+				//*bHex=true;
+			}
+			else
+			{
+				set_field_buffer(field[2], 0, " ");
+				set_field_buffer(field[4], 0, "X");
+				//*bHex=false;
+			}
+			break;
+		default:
+			/* invalid cType */
+			return iRet;
+	}
+
 
 	/* set up form */
 	frmPanel[0]=new_panel(stdscr);
@@ -141,9 +260,40 @@ int nhexFrmInput(char *pTitle, char *pQuestion, char *pAnswer, int length)
 			case KEY_END:
 				form_driver(frmForm, REQ_END_FIELD);
 				break;
+			case HNKEY_TAB:
+				form_driver(frmForm, REQ_NEXT_FIELD);
+				break;
+			case HNKEY_STAB:
+				form_driver(frmForm, REQ_PREV_FIELD);
+				break;
 			default:
-				if(ch >= 32 && ch < 127)
-					form_driver(frmForm, ch);
+				i=field_index(current_field(frmForm));
+				if(i == 2 || i == 4)
+				{
+					/* hex/ascii/numeric fields */
+					if(ch == 32 || (ch & 95) == 'X')
+					{
+						set_field_buffer(field[i], 0, "X");
+						set_field_buffer(field[6-i], 0, " ");
+						if(i == 2)
+						{
+							if(!*bHex) nhexFrmHexConv(bHex, field[1], cType);
+						}
+						else
+						{
+							if(*bHex) nhexFrmHexConv(bHex, field[1], cType);
+						}
+					}
+				}
+				else
+				{
+					if(*bHex && ((ch >= '0' && ch <= '9') || (ch >='A' && ch <= 'F') || (ch >= 'a' && ch <= 'f')))
+						form_driver(frmForm, ch);
+					else if(!*bHex && cType == 'a' && ch >='0' && ch <= '9')
+						form_driver(frmForm, ch);
+					else if(!*bHex && (cType == 's' || cType == 't') && ch >= 32 && ch <= 126)
+						form_driver(frmForm, ch);
+				}
 				break;
 		}
 		if(ready) break;

@@ -216,7 +216,10 @@ int main(int argc, char *argv[])
 				printf("\nReport bugs to <niels.horn@gmail.com>\n");
 				exit(0);
 			case 'j':
-				jval=atoi(optarg);
+				if(optarg[strlen(optarg)-1] == 'h')
+					sscanf(optarg, "%X", &jval);
+				else
+					jval=atoi(optarg);
 				break;
 			case 'v':
 				printf("%s - Version %s\n", PACKAGE, VERSION);
