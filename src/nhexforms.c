@@ -255,9 +255,11 @@ int nhexFrmInput(char *pTitle, char *pQuestion, char *pAnswer, int length, char 
 				form_driver(frmForm, REQ_NEXT_CHAR);
 				break;
 			case KEY_HOME:
+			case HNKEY_HOME:
 				form_driver(frmForm, REQ_BEG_FIELD);
 				break;
 			case KEY_END:
+			case HNKEY_END:
 				form_driver(frmForm, REQ_END_FIELD);
 				break;
 			case HNKEY_TAB:

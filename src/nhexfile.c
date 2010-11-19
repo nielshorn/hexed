@@ -34,11 +34,12 @@
 int nhexFileGetName(char *newFile, int flags)
 {
 	int	iRet;
+	bool	bHex=false;
 
 	if(flags == 1)
-		iRet=nhexFrmInput("Save As...", "Enter filename:", newFile, MAXFILENAME-1, 't', false);
+		iRet=nhexFrmInput("Save As...", "Enter filename:", newFile, MAXFILENAME-1, 't', &bHex);
 	else
-		iRet=nhexFrmInput("Open File...", "Enter filename:", newFile, MAXFILENAME-1, 't', false);
+		iRet=nhexFrmInput("Open File...", "Enter filename:", newFile, MAXFILENAME-1, 't', &bHex);
 
 	return iRet;
 }
