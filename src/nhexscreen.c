@@ -51,10 +51,6 @@ void nhexScreenSetup(struct Screen *nhexScreen)
 
 	nhexScreen->iRows=y-2;			/* -1 for menu, -1 for status */
 	nhexScreen->iChunks=(nhexScreen->iCols-45)/34+1;
-
-	nhexScreenHeader();
-
-	refresh();
 }
 
 /* Show one byte */

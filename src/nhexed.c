@@ -162,7 +162,8 @@ int nhexJumpPos(struct nhexBuff *nhexFile, unsigned int iNewPos)
 {
 	int		iRet;		/* 1=update, 2 = redraw */
 
-	if(iNewPos >= nhexFile->iOff && iNewPos<=nhexFile->iOff + nhexScreen.iRows*nhexScreen.iChunks*8 - 1)
+	if(iNewPos >= nhexFile->iOff && iNewPos<=nhexFile->iOff + nhexScreen.iRows*nhexScreen.iChunks*8 - 1 && \
+			nhexFile->iOff % (nhexScreen.iChunks*8) == 0)
 	{
 		/* new position is on the screen */
 		nhexScreenDetReset(nhexFile);
@@ -268,6 +269,7 @@ int main(int argc, char *argv[])
 		exit(1);
 	
 	nhexScreenSetup(&nhexScreen);
+	nhexScreenHeader();
 	if(jval)
 	{
 		/* goto initial position in file */
@@ -348,7 +350,8 @@ int main(int argc, char *argv[])
 				}
 				break;
 			case KEY_DOWN:
-				if(nhexFile.iOff + (nhexFile.iyPos+1) * nhexScreen.iChunks*8 + nhexFile.ixPos +1 <= nhexFile.iFileLength)
+				if(nhexFile.iOff + (nhexFile.iyPos+1) * nhexScreen.iChunks*8 + \
+					nhexFile.ixPos +1 <= nhexFile.iFileLength)
 				{
 					if(nhexFile.iyPos == nhexScreen.iRows-1)
 					{
@@ -378,9 +381,11 @@ int main(int argc, char *argv[])
 				if(nhexFile.iOff + nhexScreen.iRows * nhexScreen.iChunks*8 < nhexFile.iFileLength)
 				{
 					nhexFile.iOff+=nhexScreen.iRows * nhexScreen.iChunks*8;
-					if(nhexFile.iOff + nhexFile.iyPos * nhexScreen.iChunks*8 + nhexFile.ixPos > nhexFile.iFileLength - 1)
+					if(nhexFile.iOff + nhexFile.iyPos * nhexScreen.iChunks*8 + \
+						nhexFile.ixPos > nhexFile.iFileLength - 1)
 					{
-						nhexFile.iyPos=(nhexFile.iFileLength-1 - nhexFile.iOff) / (nhexScreen.iChunks*8);
+						nhexFile.iyPos=(nhexFile.iFileLength-1 - nhexFile.iOff) / \
+							(nhexScreen.iChunks*8);
 						if(nhexFile.ixPos > (nhexFile.iFileLength - 1) % (nhexScreen.iChunks*8))
 							nhexFile.ixPos=(nhexFile.iFileLength - 1) % (nhexScreen.iChunks*8);
 					}
@@ -411,7 +416,8 @@ int main(int argc, char *argv[])
 			case KEY_SRIGHT:
 				nhexScreenDetReset(&nhexFile);
 				nhexFile.ixPos=nhexScreen.iChunks*8 - 1;
-				if(nhexFile.iOff + nhexFile.iyPos * nhexScreen.iChunks*8 + nhexFile.ixPos > nhexFile.iFileLength)
+				if(nhexFile.iOff + nhexFile.iyPos * nhexScreen.iChunks*8 + \
+					nhexFile.ixPos > nhexFile.iFileLength)
 					nhexFile.ixPos=(nhexFile.iFileLength-1) % (nhexScreen.iChunks*8);
 				scrUpdate=true;
 				nhexFile.bHiLo=false;
@@ -450,6 +456,13 @@ int main(int argc, char *argv[])
 					ready=true;
 				else
 					scrRedraw=true;
+				break;
+			case KEY_RESIZE:
+				/* recalculate iRows/iChunks/iCols, reset screen & jump to where we were */
+				jval=nhexFile.iOff + nhexFile.iyPos*nhexScreen.iChunks*8 + nhexFile.ixPos;
+				nhexScreenSetup(&nhexScreen);
+				nhexJumpPos(&nhexFile, jval);
+				scrRedraw=true;
 				break;
 			default:
 				/* check menu keycodes */

@@ -1,4 +1,4 @@
-2010-xx-xx  Niels Horn <niels.horn@gmail.com>
+2010-11-21  Niels Horn <niels.horn@gmail.com>
 
  * 2.00.03:	Third alpha release.
 		- Improved menu routines, w/ shortcuts and direct-access
@@ -8,6 +8,7 @@
 		hex/ascii setting)
 		- Improved goto function (remembers hex/decimal)
 		- Added -j startup option (address in decimal or hex)
+		- Treat screen resize events
 		- Check for ncurses in configure.in
 		- BUGFIX: inverted del_panel/delwin (caused segfaults in rare
 		occasions)
