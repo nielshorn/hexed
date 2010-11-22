@@ -20,3 +20,7 @@ src/nhexed
 depcomp
 install-sh
 missing
+# test files
+/test*
+# internal todo
+_todo

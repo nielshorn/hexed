@@ -1,0 +1,22 @@
+(n)Hex-Ed is and probably always will be a "work-in-progress", so this TODO
+list will never be empty :)
+
+2.01.00
+-------
+For final release:
+- improve message routines
+
+2.02.00
+-------
+- gtk version
+- colors
+- more command line options
+- preferences in config-file
+- multiple files in tabs
+- search & replace
+- fill nn x 'xxh' etc
+- menu - file-info
+
+2.??.??
+-------
+- scripting language... (option --run=)
