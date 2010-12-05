@@ -32,6 +32,8 @@ struct	Screen	nhexScreen;
 /* Show standard header line */
 void nhexScreenHeader(void)
 {
+	if(nhexScreen.iChunks == -1) return;
+
 	mvprintw(0, 0, "%s-v%s",PACKAGE,VERSION);
 	clrtoeol();
 	mvprintw(0, nhexScreen.iCols-21, "|Press <F12> for menu");
@@ -50,7 +52,11 @@ void nhexScreenSetup(struct Screen *nhexScreen)
 	getmaxyx(stdscr, y, nhexScreen->iCols);
 
 	nhexScreen->iRows=y-2;			/* -1 for menu, -1 for status */
-	nhexScreen->iChunks=(nhexScreen->iCols-45)/34+1;
+
+	if(y < MINROWS || nhexScreen->iCols < MINCOLUMNS)
+		nhexScreen->iChunks=-1;
+	else
+		nhexScreen->iChunks=(nhexScreen->iCols-45)/34+1;
 }
 
 /* Show one byte */
@@ -58,6 +64,8 @@ void nhexScreenShowByte(struct nhexBuff *nhexFile, int i, int iyPos, int ixHexPo
 {
 	char		style;
 	unsigned char	c;
+
+	if(nhexScreen.iChunks == -1) return;
 
 	c=nhexFileReadPos(nhexFile, i, &style);
 	if(style == 'c') attron(A_REVERSE);
@@ -74,6 +82,20 @@ void nhexScreenShow(struct nhexBuff *nhexFile)
 	int		j=-1;
 	int		k=0, spacer=0;
 	int		ixHexPos, ixAscPos;
+
+	if(nhexScreen.iChunks == -1)
+	{
+		for(i=0; i < nhexScreen.iRows+2; i++)
+		{
+			move(i, 0);
+			clrtoeol();
+		}
+		move(nhexScreen.iRows/2+1, (nhexScreen.iCols-16)/2);
+		attron(A_REVERSE);
+		printw("Screen too small");
+		attroff(A_REVERSE);
+		return;
+	}
 
 	for(i=nhexFile->iOff; i < nhexFile->iFileLength; i++)
 	{
@@ -133,6 +155,8 @@ void nhexScreenDetails(struct nhexBuff *nhexFile)
 	int		ixHexPos, ixAscPos, ixCurPos;
 	char		*p;
 
+	if(nhexScreen.iChunks == -1) return;
+
 	iPos=nhexFile->iOff + nhexFile->iyPos * nhexScreen.iChunks*8 + nhexFile->ixPos;
 	iChunkPos=nhexFile->ixPos / 8;
 	ixHexPos=11+nhexFile->ixPos * 3 + iChunkPos;
@@ -185,7 +209,7 @@ void nhexScreenDetails(struct nhexBuff *nhexFile)
 	else
 	{
 		mvprintw(nhexScreen.iRows/2-1, (nhexScreen.iCols-7)/2, "nHex-Ed");
-		mvprintw(nhexScreen.iRows/2+1, (nhexScreen.iCols-23)/2, "Pess <F12> for the menu");
+		mvprintw(nhexScreen.iRows/2+1, (nhexScreen.iCols-23)/2, "Press <F12> for the menu");
 	}
 
 	refresh();
@@ -198,6 +222,8 @@ void nhexScreenDetReset(struct nhexBuff *nhexFile)
 {
 	unsigned int	iPos;
 	int		iChunkPos, ixHexPos, ixAscPos;
+
+	if (nhexScreen.iChunks == -1) return;
 
 	iPos=nhexFile->iOff + nhexFile->iyPos * 8 * nhexScreen.iChunks + nhexFile->ixPos;
 	iChunkPos=nhexFile->ixPos/8;
