@@ -223,13 +223,13 @@ static	bool		bFindHex=true, bGotoHex=true;
 	else if(!strcmp(sFunction, "HelpHelp"))
 	{
 		sprintf(sMsg, "Basic Help\n==========\n");
-		sprintf(sMsg, "%sLeft/Right/Up/Down       : Move Left/Right/Up/Down\n", sMsg);
-		sprintf(sMsg, "%sShift-Left / Shift-Right : Beginning / End of line\n", sMsg);
-		sprintf(sMsg, "%sPgUp / PgDown            : Move Up/Down one page\n", sMsg);
-		sprintf(sMsg, "%sHome/End                 : Beginning / End of file\n", sMsg);
-		sprintf(sMsg, "%sTab                      : Alternate between Hex/ASCII\n", sMsg);
-		sprintf(sMsg, "%s^X                       : Undo last change\n", sMsg);
-		sprintf(sMsg, "%sEsc / F1 / F12           : Goto Menu (Esc to leave)\n", sMsg);
+		sprintf(sMsg, "%sArrow keys       : Move cursor\n", sMsg);
+		sprintf(sMsg, "%sShift-Left/Right : Beginning/End of line\n", sMsg);
+		sprintf(sMsg, "%sPgUp / PgDown    : Move Up/Down one page\n", sMsg);
+		sprintf(sMsg, "%sHome/End         : Beginning/End of file\n", sMsg);
+		sprintf(sMsg, "%sTab              : Switch Hex <> ASCII\n", sMsg);
+		sprintf(sMsg, "%s^X               : Undo last change\n", sMsg);
+		sprintf(sMsg, "%sEsc / F12        : Menu (Esc to leave)\n", sMsg);
 		nhexMsg(NHMSGML + NHMSGINFO + NHMSGOK, sMsg);
 	}
 	else if(!strcmp(sFunction, "HelpAbout"))
