@@ -36,7 +36,7 @@ if test "$LCURS" = "no"; then
 fi
 AM_CONFIG_HEADER(config.h)
 CFLAGS="$CFLAGS -Wall"
-AM_INIT_AUTOMAKE(nhexed,2.00.03)
+AM_INIT_AUTOMAKE(nhexed,2.00.91)
 AC_PROG_CC
 AC_OUTPUT(Makefile src/Makefile)
 

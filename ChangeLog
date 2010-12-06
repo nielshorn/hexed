@@ -1,3 +1,12 @@
+2010-12-05  Niels Horn <niels.horn@gmail.com>
+
+ * 2.00.91:	Beta Release.
+		- More compact help text, to fit in small lay-out
+		- BUGFIX: After resize, warning if screen too small
+		Depending on user feedback, this is very close to a first
+		release. There are still many plans for improvements, but this
+		is a stable version, good enough to release :)
+
 2010-11-21  Niels Horn <niels.horn@gmail.com>
 
  * 2.00.03:	Third alpha release.
